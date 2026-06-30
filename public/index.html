@@ -379,8 +379,8 @@ async function searchPlace(query) {
     result = await PlaceClass.searchByText({
       textQuery,
       fields: PLACE_FIELDS,
-      languageCode: 'en',
-      regionCode: 'ES',
+      language: 'en',
+      region: 'ES',
     });
   } catch(e) {
     const msg = e.message || '';
