@@ -377,6 +377,8 @@ function findPlace(query) {
     placesService.findPlaceFromQuery(req, (results, status) => {
       if (status === google.maps.places.PlacesServiceStatus.OK && results?.length) {
         resolve(results[0]);
+      } else if (status === 'REQUEST_DENIED') {
+        reject(new Error('API key rejected (REQUEST_DENIED). Fix: in Google Cloud Console, enable the Maps JavaScript API and Places API for your key, and make sure billing is activated on the project.'));
       } else {
         reject(new Error(`Could not find salon. Try a more specific name or paste the Google Maps URL. (Status: ${status})`));
       }
