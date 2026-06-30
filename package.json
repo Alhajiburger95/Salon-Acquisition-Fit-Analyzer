@@ -1,0 +1,14 @@
+{
+  "name": "salon-acquisition-analyzer",
+  "version": "1.0.0",
+  "description": "Salon acquisition fit analyzer for Barcelona roll-up strategy",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "npx nodemon server.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "express": "^4.18.2"
+  }
+}

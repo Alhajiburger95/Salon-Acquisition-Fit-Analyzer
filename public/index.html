@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salon Acquisition Fit Analyzer</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f5f5f5;
+    color: #1a1a1a;
+    min-height: 100vh;
+  }
+
+  header {
+    background: #1a1a1a;
+    color: #fff;
+    padding: 20px 32px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  header h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
+  header span { font-size: 13px; color: #888; }
+
+  main { max-width: 880px; margin: 0 auto; padding: 32px 24px; }
+
+  /* ── INPUT PANEL ── */
+  .panel {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+  .panel h2 { font-size: 15px; font-weight: 600; margin-bottom: 20px; }
+
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #666;
+    margin-bottom: 5px;
+  }
+  .field input, .field select, .field textarea {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid #d0d0d0;
+    border-radius: 5px;
+    font-size: 14px;
+    color: #1a1a1a;
+    background: #fff;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    outline: none; border-color: #1a1a1a;
+  }
+  .field textarea { resize: vertical; min-height: 68px; }
+  .field-note { font-size: 12px; color: #999; margin-top: 4px; }
+
+  .section-rule {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.8px; color: #aaa;
+    margin: 22px 0 14px; border-top: 1px solid #eee; padding-top: 18px;
+  }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+  .btn-primary {
+    margin-top: 20px;
+    background: #1a1a1a; color: #fff;
+    border: none; border-radius: 5px;
+    padding: 12px 28px; font-size: 14px; font-weight: 600;
+    cursor: pointer; letter-spacing: 0.2px;
+  }
+  .btn-primary:disabled { background: #bbb; cursor: not-allowed; }
+
+  .btn-ghost {
+    background: transparent; color: #1a1a1a;
+    border: 1px solid #ccc; border-radius: 5px;
+    padding: 9px 18px; font-size: 13px; cursor: pointer;
+    margin-left: 10px;
+  }
+  .btn-ghost:hover { border-color: #1a1a1a; }
+
+  /* ── STATUS ── */
+  .error-box {
+    background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;
+    border-radius: 6px; padding: 12px 16px; font-size: 14px;
+    margin-bottom: 18px; display: none;
+  }
+  .loading {
+    text-align: center; padding: 48px; color: #888; font-size: 14px; display: none;
+  }
+  .spinner {
+    width: 30px; height: 30px;
+    border: 3px solid #e0e0e0; border-top-color: #1a1a1a;
+    border-radius: 50%; animation: spin 0.7s linear infinite;
+    margin: 0 auto 14px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── REPORT ── */
+  #report { display: none; }
+
+  .report-header {
+    background: #fff; border: 1px solid #e0e0e0;
+    border-radius: 8px; padding: 24px 28px; margin-bottom: 14px;
+  }
+  .report-top {
+    display: flex; justify-content: space-between;
+    align-items: flex-start; flex-wrap: wrap; gap: 12px;
+    margin-bottom: 18px;
+  }
+  .salon-name { font-size: 22px; font-weight: 700; letter-spacing: -0.4px; }
+  .salon-address { font-size: 13px; color: #666; margin-top: 3px; }
+  .rating-block { text-align: right; }
+  .rating-stars { color: #f59e0b; font-size: 16px; }
+  .rating-num { font-size: 22px; font-weight: 700; }
+  .rating-count { font-size: 13px; color: #888; }
+
+  .rec-banner {
+    border-radius: 6px; padding: 16px 20px;
+    display: flex; align-items: flex-start; gap: 18px;
+  }
+  .rec-verdict { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; white-space: nowrap; }
+  .rec-reason { font-size: 14px; line-height: 1.55; padding-top: 4px; }
+
+  /* ── CATEGORIES ── */
+  .cat-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 14px; margin-bottom: 14px;
+  }
+  .cat-card {
+    background: #fff; border: 1px solid #e0e0e0;
+    border-radius: 8px; padding: 20px 22px;
+  }
+  .cat-card.full { grid-column: 1 / -1; }
+  .cat-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .cat-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #555; }
+  .badge {
+    font-size: 11px; font-weight: 700; padding: 3px 10px;
+    border-radius: 20px; letter-spacing: 0.3px;
+  }
+  .badge-green  { background: #dcfce7; color: #15803d; }
+  .badge-yellow { background: #fef9c3; color: #854d0e; }
+  .badge-red    { background: #fee2e2; color: #991b1b; }
+  .badge-gray   { background: #f1f5f9; color: #64748b; }
+
+  .score-bar { height: 4px; background: #eee; border-radius: 2px; margin-bottom: 12px; overflow: hidden; }
+  .score-fill { height: 100%; border-radius: 2px; }
+
+  .factors { list-style: none; }
+  .factors li {
+    font-size: 13px; color: #555; padding: 3px 0 3px 14px;
+    position: relative; line-height: 1.4;
+  }
+  .factors li::before {
+    content: '·'; position: absolute; left: 0;
+    color: #ccc; font-size: 16px; line-height: 1; top: 4px;
+  }
+
+  /* ── REVIEWS ── */
+  .reviews-panel {
+    background: #fff; border: 1px solid #e0e0e0;
+    border-radius: 8px; padding: 20px 22px; margin-bottom: 14px;
+    display: none;
+  }
+  .reviews-panel h3 {
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.7px; color: #555; margin-bottom: 14px;
+  }
+  .review { border-top: 1px solid #f0f0f0; padding: 11px 0; }
+  .review:first-child { border-top: none; padding-top: 0; }
+  .review-text { font-size: 13px; color: #444; line-height: 1.5; }
+  .review-meta { font-size: 11px; color: #aaa; margin-top: 5px; }
+  .r-stars { color: #f59e0b; font-size: 12px; margin-right: 6px; }
+
+  .footnote { font-size: 12px; color: #aaa; text-align: center; margin-top: 6px; }
+
+  /* hidden map div required by Places API */
+  #map { display: none; }
+
+  @media print {
+    body { background: #fff; }
+    header { background: #1a1a1a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .no-print, .panel { display: none !important; }
+    #report { display: block !important; }
+    .rec-banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .cat-grid { grid-template-columns: 1fr 1fr; }
+    .cat-card, .report-header { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Salon Acquisition Fit Analyzer</h1>
+  <span>Barcelona Roll-Up · Pre-Acquisition Screening</span>
+</header>
+
+<div id="map"></div>
+
+<main>
+
+  <!-- INPUT PANEL -->
+  <div class="panel no-print" id="inputPanel">
+    <h2>Target Salon</h2>
+
+    <div class="field">
+      <label>Salon Name or Google Maps URL</label>
+      <input id="salonInput" type="text"
+        placeholder="e.g. Peluquería Can Barret  or  paste a Google Maps link" />
+    </div>
+
+    <div class="field">
+      <label>Google Places API Key</label>
+      <input id="apiKey" type="password" placeholder="AIza…" />
+      <div class="field-note">Stays in your browser — only sent directly to Google's API.</div>
+    </div>
+
+    <div class="section-rule">Manual Intelligence (not publicly available)</div>
+
+    <div class="grid-3">
+      <div class="field">
+        <label>Owner Estimated Age</label>
+        <input id="ownerAge" type="number" placeholder="e.g. 58" min="18" max="90" />
+      </div>
+      <div class="field">
+        <label>Years in Operation</label>
+        <input id="yearsOp" type="number" placeholder="e.g. 18" min="0" max="80" />
+      </div>
+      <div class="field">
+        <label>Staff Count</label>
+        <input id="staffCount" type="number" placeholder="e.g. 4" min="1" max="50" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Owner Willingness to Sell</label>
+      <select id="willingness">
+        <option value="unknown">Unknown</option>
+        <option value="open">Open to discussion</option>
+        <option value="yes">Has expressed interest</option>
+        <option value="no">Not interested</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Site Visit / Conversation Notes</label>
+      <textarea id="notes" placeholder="Anything observed in person — owner age, vibe, staffing, signage, condition of space…"></textarea>
+    </div>
+
+    <button class="btn-primary" id="analyzeBtn" onclick="startAnalysis()">Analyze Salon</button>
+  </div>
+
+  <div class="error-box" id="errBox"></div>
+  <div class="loading" id="loading"><div class="spinner"></div>Pulling data from Google Places…</div>
+
+  <!-- REPORT -->
+  <div id="report">
+
+    <div class="report-header">
+      <div class="report-top">
+        <div>
+          <div class="salon-name" id="rName"></div>
+          <div class="salon-address" id="rAddr"></div>
+        </div>
+        <div class="rating-block">
+          <div class="rating-stars" id="rStars"></div>
+          <div><span class="rating-num" id="rRating"></span></div>
+          <div class="rating-count" id="rCount"></div>
+        </div>
+      </div>
+      <div class="rec-banner" id="recBanner">
+        <div class="rec-verdict" id="recVerdict"></div>
+        <div class="rec-reason" id="recReason"></div>
+      </div>
+    </div>
+
+    <div class="cat-grid" id="catGrid"></div>
+
+    <div class="reviews-panel" id="reviewsPanel">
+      <h3>Review Samples (up to 5 most recent in English)</h3>
+      <div id="reviewsList"></div>
+    </div>
+
+    <div class="footnote">
+      Generated <span id="genDate"></span> · Data: Google Places API · Reviews capped at 5 per query
+    </div>
+
+    <div style="margin-top:16px" class="no-print">
+      <button class="btn-primary" onclick="window.print()">Print / Save PDF</button>
+      <button class="btn-ghost" onclick="resetView()">← New Analysis</button>
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+// ── Google Maps JS API loader ─────────────────────────────────────────
+let mapsLoaded = false;
+let placesService = null;
+
+function loadMapsApi(key) {
+  return new Promise((resolve, reject) => {
+    if (mapsLoaded && placesService) { resolve(); return; }
+    if (document.getElementById('gmaps-script')) {
+      // already loading, wait
+      const wait = setInterval(() => {
+        if (window.google && window.google.maps && window.google.maps.places) {
+          clearInterval(wait);
+          initService();
+          resolve();
+        }
+      }, 100);
+      return;
+    }
+    window.__mapsReady = () => { mapsLoaded = true; initService(); resolve(); };
+    const s = document.createElement('script');
+    s.id = 'gmaps-script';
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places&callback=__mapsReady`;
+    s.onerror = () => reject(new Error('Failed to load Google Maps API. Check that your API key is valid and the Maps JavaScript API + Places API are enabled.'));
+    document.head.appendChild(s);
+  });
+}
+
+function initService() {
+  const mapEl = document.getElementById('map');
+  const map = new google.maps.Map(mapEl, { center: { lat: 41.3851, lng: 2.1734 }, zoom: 13 });
+  placesService = new google.maps.places.PlacesService(map);
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s ?? '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function starsHtml(n) {
+  n = Math.round(n * 2) / 2;
+  let s = '';
+  for (let i = 1; i <= 5; i++) {
+    if (i <= n) s += '★';
+    else if (i - 0.5 === n) s += '½';
+    else s += '☆';
+  }
+  return s;
+}
+
+function rtext(place) {
+  return (place.reviews || []).map(r => r.text || '').join(' ').toLowerCase();
+}
+
+// ── Extract name from Maps URL ─────────────────────────────────────────
+function nameFromUrl(url) {
+  try {
+    const m = url.match(/\/maps\/place\/([^/@?&]+)/);
+    if (m) return decodeURIComponent(m[1].replace(/\+/g,' '));
+    const q = url.match(/[?&]q=([^&]+)/);
+    if (q) return decodeURIComponent(q[1].replace(/\+/g,' '));
+  } catch(_) {}
+  return null;
+}
+
+// ── Places API wrappers (promise) ──────────────────────────────────────
+function findPlace(query) {
+  return new Promise((resolve, reject) => {
+    const req = {
+      query: /barcelona/i.test(query) ? query : query + ' Barcelona',
+      fields: ['place_id', 'name', 'geometry', 'formatted_address']
+    };
+    placesService.findPlaceFromQuery(req, (results, status) => {
+      if (status === google.maps.places.PlacesServiceStatus.OK && results?.length) {
+        resolve(results[0]);
+      } else {
+        reject(new Error(`Could not find salon. Try a more specific name or paste the Google Maps URL. (Status: ${status})`));
+      }
+    });
+  });
+}
+
+function getDetails(placeId) {
+  return new Promise((resolve, reject) => {
+    const fields = [
+      'name','rating','user_ratings_total','price_level',
+      'opening_hours','formatted_address','website','url',
+      'reviews','geometry','types','business_status','formatted_phone_number','photos'
+    ];
+    placesService.getDetails({ placeId, fields, language: 'en' }, (result, status) => {
+      if (status === google.maps.places.PlacesServiceStatus.OK) resolve(result);
+      else reject(new Error(`Could not load place details. (${status})`));
+    });
+  });
+}
+
+function nearbySearch(location) {
+  return new Promise((resolve) => {
+    placesService.nearbySearch({ location, radius: 400 }, (results, status) => {
+      resolve(results || []);
+    });
+  });
+}
+
+// ── SCORING ───────────────────────────────────────────────────────────
+
+function scoreSuccession(place, manual) {
+  let score = 0, max = 8;
+  const factors = [];
+
+  const age = parseInt(manual.ownerAge);
+  if (!isNaN(age)) {
+    if (age >= 60)      { score += 3; factors.push(`Owner est. age ${age} — likely approaching retirement`); }
+    else if (age >= 50) { score += 2; factors.push(`Owner est. age ${age} — mid-to-late career`); }
+    else if (age >= 40) { score += 1; factors.push(`Owner est. age ${age} — mid-career`); }
+    else                {             factors.push(`Owner est. age ${age} — relatively young`); }
+  } else {
+    factors.push('Owner age not provided');
+  }
+
+  const years = parseInt(manual.yearsOp);
+  if (!isNaN(years)) {
+    if (years >= 20)      { score += 3; factors.push(`${years} years in operation — long-established legacy business`); }
+    else if (years >= 10) { score += 2; factors.push(`${years} years in operation`); }
+    else if (years >= 5)  { score += 1; factors.push(`${years} years in operation — relatively new`); }
+    else                  {             factors.push(`Only ${years} year(s) in operation`); }
+  } else {
+    factors.push('Years in operation not provided');
+  }
+
+  if (!place.website) {
+    score += 1; factors.push('No website — no digital succession investment');
+  } else {
+    factors.push('Has a website');
+  }
+
+  const rt = rtext(place);
+  const bookingKws = ['book online','online booking','treatwell','booksy','fresha','vagaro','appointy'];
+  if (!bookingKws.some(k => rt.includes(k))) {
+    score += 1; factors.push('No online booking signals in reviews');
+  } else {
+    factors.push('Online booking platform referenced in reviews');
+  }
+
+  const level = score >= 6 ? 'High' : score >= 4 ? 'Medium' : 'Low';
+  return { score, max, level, factors };
+}
+
+function scoreLoyalty(place) {
+  let score = 0, max = 9;
+  const factors = [];
+  const rating = place.rating || 0;
+  const rcount = place.user_ratings_total || 0;
+
+  if (rating >= 4.5)      { score += 3; factors.push(`Excellent rating: ${rating}/5`); }
+  else if (rating >= 4.0) { score += 2; factors.push(`Good rating: ${rating}/5`); }
+  else if (rating >= 3.5) { score += 1; factors.push(`Average rating: ${rating}/5`); }
+  else if (rating > 0)    {             factors.push(`Below average rating: ${rating}/5`); }
+  else                    {             factors.push('No rating data'); }
+
+  if (rcount >= 200)     { score += 3; factors.push(`High review volume: ${rcount.toLocaleString()} reviews`); }
+  else if (rcount >= 80) { score += 2; factors.push(`Moderate review volume: ${rcount} reviews`); }
+  else if (rcount >= 20) { score += 1; factors.push(`Limited review volume: ${rcount} reviews`); }
+  else                   {             factors.push(`Very few reviews: ${rcount}`); }
+
+  const rt = rtext(place);
+  const loyKws = ['years','always come','always go','regular','every week','every month',
+    'been coming','long time','loyal','best in','never going anywhere','since i','for years'];
+  const hits = loyKws.filter(k => rt.includes(k));
+  if (hits.length >= 3)     { score += 3; factors.push('Strong repeat-customer language in reviews'); }
+  else if (hits.length >= 1){ score += 1; factors.push('Some repeat-customer signals in reviews'); }
+  else                      {             factors.push('No strong loyalty signals in available reviews'); }
+
+  const level = score >= 7 ? 'High' : score >= 4 ? 'Medium' : 'Low';
+  return { score, max, level, factors };
+}
+
+function scoreDigitalGap(place) {
+  let score = 0, max = 5;
+  const factors = [];
+
+  if (!place.website) {
+    score += 2; factors.push('No website — significant digital gap');
+  } else {
+    factors.push(`Has website`);
+  }
+
+  const rt = rtext(place);
+  const bkws = ['book online','online booking','treatwell','booksy','fresha','vagaro'];
+  if (!bkws.some(k => rt.includes(k))) {
+    score += 2; factors.push('No online booking platform detected');
+  } else {
+    factors.push('Online booking platform mentioned in reviews');
+  }
+
+  if ((place.user_ratings_total || 0) < 40) {
+    score += 1; factors.push('Low review count — limited digital visibility');
+  }
+
+  const level = score >= 4 ? 'High' : score >= 2 ? 'Medium' : 'Low';
+  return { score, max, level, factors };
+}
+
+function scoreLocation(place, nearby) {
+  let score = 0, max = 5;
+  const factors = [];
+  const myId = place.place_id;
+
+  const compTypes = new Set(['cafe','restaurant','food','bakery','pharmacy','drugstore',
+    'gym','fitness_center','supermarket','grocery_or_supermarket','clothing_store',
+    'shoe_store','shopping_mall','bank','convenience_store']);
+  const salonTypes = new Set(['hair_care','beauty_salon','barber']);
+
+  const comps = nearby.filter(p =>
+    p.place_id !== myId && p.types?.some(t => compTypes.has(t)));
+  const rivals = nearby.filter(p =>
+    p.place_id !== myId && p.types?.some(t => salonTypes.has(t)));
+
+  if (comps.length >= 12)    { score += 3; factors.push(`Very high foot traffic: ${comps.length} complementary businesses within 400m`); }
+  else if (comps.length >= 6){ score += 2; factors.push(`Good foot traffic: ${comps.length} complementary businesses nearby`); }
+  else if (comps.length >= 2){ score += 1; factors.push(`${comps.length} complementary businesses in the vicinity`); }
+  else                       {             factors.push('Sparse surrounding commerce'); }
+
+  if (rivals.length <= 2)      { score += 2; factors.push(`Low competition: ${rivals.length} other salon(s) within 400m`); }
+  else if (rivals.length <= 4) { score += 1; factors.push(`Moderate competition: ${rivals.length} salons nearby`); }
+  else                         {             factors.push(`High competition: ${rivals.length} salons within 400m`); }
+
+  const level = score >= 4 ? 'High' : score >= 2 ? 'Medium' : 'Low';
+  return { score, max, level, factors };
+}
+
+function scoreFlags(place) {
+  const defs = [
+    { kw: 'wait',           label: 'Long wait times mentioned' },
+    { kw: 'waiting time',   label: 'Long wait times mentioned' },
+    { kw: 'rude',           label: 'Staff rudeness complaints' },
+    { kw: 'dirty',          label: 'Cleanliness concerns' },
+    { kw: 'overpriced',     label: 'Overpricing complaints' },
+    { kw: 'inconsistent',   label: 'Inconsistent service quality' },
+    { kw: 'never again',    label: 'Strong dissatisfaction expressed' },
+    { kw: 'understaffed',   label: 'Understaffing issues' },
+    { kw: 'cancelled my',   label: 'Appointment cancellation issues' },
+    { kw: 'unprofessional', label: 'Professionalism concerns' },
+    { kw: 'worst',          label: 'Strongly negative sentiment' },
+    { kw: 'avoid',          label: 'Customers advising others to avoid' },
+  ];
+  const rt = rtext(place);
+  const seen = new Set();
+  const flags = defs.filter(({ kw, label }) => rt.includes(kw) && !seen.has(label) && seen.add(label));
+  const level = flags.length >= 3 ? 'High' : flags.length >= 1 ? 'Medium' : 'Low';
+  return { count: flags.length, level, flags: flags.map(f => f.label) };
+}
+
+function buildRecommendation(suc, loy, dig, loc, ops) {
+  const goodSuc = suc.level !== 'Low';
+  const goodLoy = loy.level !== 'Low';
+  const hasGap  = dig.level !== 'Low';
+  const goodLoc = loc.level !== 'Low';
+  const cleanOps= ops.level !== 'High';
+
+  if (goodSuc && goodLoy && cleanOps) {
+    let reason;
+    if (suc.level === 'High' && loy.level === 'High')
+      reason = 'Strong owner succession risk combined with a loyal customer base and clear digital upside makes this a high-priority acquisition target.';
+    else if (suc.level === 'High')
+      reason = 'High succession risk and adequate customer loyalty signal an owner ready for an exit — approach soon.';
+    else if (hasGap)
+      reason = 'Solid fundamentals with a meaningful digital gap that centralised operations can close quickly.';
+    else
+      reason = 'Good fit across succession risk, customer loyalty, and operational profile.';
+    return { label: 'Pursue', reason, bg: '#dcfce7', border: '#86efac', color: '#15803d' };
+  }
+
+  if (!goodLoy || ops.level === 'High') {
+    let reason;
+    if (ops.level === 'High')
+      reason = 'Multiple operational red flags suggest significant management or service quality issues that would be difficult to inherit.';
+    else
+      reason = 'Weak customer loyalty signals indicate limited inheritable value in the existing customer base.';
+    return { label: 'Pass', reason, bg: '#fee2e2', border: '#fca5a5', color: '#991b1b' };
+  }
+
+  let reason;
+  if (!goodSuc)
+    reason = 'Owner succession urgency appears low — revisit in 2–3 years as the owner approaches retirement age.';
+  else if (!hasGap)
+    reason = 'Good fundamentals but limited digital upside; monitor and track for changes in ownership signals.';
+  else
+    reason = 'Mixed signals — a site visit and owner conversation would clarify fit before committing.';
+  return { label: 'Monitor', reason, bg: '#fef9c3', border: '#fde68a', color: '#92400e' };
+}
+
+// ── RENDER ───────────────────────────────────────────────────────────
+
+function badgeCls(category, level) {
+  const map = {
+    risk:     { High: 'badge-red',    Medium: 'badge-yellow', Low: 'badge-green' },
+    loyalty:  { High: 'badge-green',  Medium: 'badge-yellow', Low: 'badge-red'   },
+    gap:      { High: 'badge-green',  Medium: 'badge-yellow', Low: 'badge-gray'  },
+    location: { High: 'badge-green',  Medium: 'badge-yellow', Low: 'badge-red'   },
+    flags:    { High: 'badge-red',    Medium: 'badge-yellow', Low: 'badge-green' },
+  };
+  return map[category]?.[level] ?? 'badge-gray';
+}
+
+function barFill(category, level) {
+  const colours = {
+    risk:     { High: '#16a34a', Medium: '#ca8a04', Low: '#dc2626' },
+    loyalty:  { High: '#16a34a', Medium: '#ca8a04', Low: '#6b7280' },
+    gap:      { High: '#16a34a', Medium: '#ca8a04', Low: '#6b7280' },
+    location: { High: '#16a34a', Medium: '#ca8a04', Low: '#6b7280' },
+    flags:    { High: '#dc2626', Medium: '#ca8a04', Low: '#16a34a' },
+  };
+  return colours[category]?.[level] ?? '#6b7280';
+}
+
+function catCard(title, score, max, level, factors, category, badgeText, full) {
+  const pct = max ? Math.round(score / max * 100) : 0;
+  const color = barFill(category, level);
+  const bc = badgeCls(category, level);
+  return `
+    <div class="cat-card${full ? ' full' : ''}">
+      <div class="cat-head">
+        <div class="cat-title">${esc(title)}</div>
+        <div class="badge ${bc}">${esc(badgeText)}</div>
+      </div>
+      <div class="score-bar"><div class="score-fill" style="width:${pct}%;background:${color}"></div></div>
+      <ul class="factors">${(factors||[]).map(f=>`<li>${esc(f)}</li>`).join('')}</ul>
+    </div>`;
+}
+
+function renderReport(place, nearby, manual) {
+  const suc = scoreSuccession(place, manual);
+  const loy = scoreLoyalty(place);
+  const dig = scoreDigitalGap(place);
+  const loc = scoreLocation(place, nearby);
+  const ops = scoreFlags(place);
+  const rec = buildRecommendation(suc, loy, dig, loc, ops);
+
+  document.getElementById('rName').textContent  = place.name || '';
+  document.getElementById('rAddr').textContent  = place.formatted_address || '';
+  const rat = place.rating;
+  if (rat) {
+    document.getElementById('rStars').textContent = starsHtml(rat);
+    document.getElementById('rRating').textContent = rat.toFixed(1);
+    document.getElementById('rCount').textContent  = `${(place.user_ratings_total||0).toLocaleString()} reviews`;
+  }
+
+  const banner = document.getElementById('recBanner');
+  banner.style.cssText = `background:${rec.bg};border:1px solid ${rec.border};border-radius:6px;padding:16px 20px;display:flex;align-items:flex-start;gap:18px;`;
+  document.getElementById('recVerdict').style.color = rec.color;
+  document.getElementById('recVerdict').textContent  = rec.label;
+  document.getElementById('recReason').style.color   = rec.color;
+  document.getElementById('recReason').textContent   = rec.reason;
+
+  const grid = document.getElementById('catGrid');
+  grid.innerHTML =
+    catCard('1 · Succession Risk',       suc.score, suc.max, suc.level, suc.factors, 'risk',     suc.level + ' Risk') +
+    catCard('2 · Customer Loyalty',      loy.score, loy.max, loy.level, loy.factors, 'loyalty',  loy.level + ' Loyalty') +
+    catCard('3 · Digital Maturity Gap',  dig.score, dig.max, dig.level, dig.factors, 'gap',      dig.level + ' Opportunity') +
+    catCard('4 · Location Strength',     loc.score, loc.max, loc.level, loc.factors, 'location', loc.level + ' Location') +
+    catCard('5 · Operational Red Flags',
+      ops.count, 4, ops.level,
+      ops.flags.length ? ops.flags : ['No significant negative patterns detected in available reviews'],
+      'flags',
+      ops.level === 'Low' ? 'None Detected' : ops.level === 'Medium' ? 'Minor Flags' : 'Major Flags',
+      true
+    );
+
+  const reviews = place.reviews || [];
+  if (reviews.length) {
+    document.getElementById('reviewsList').innerHTML = reviews.map(r => `
+      <div class="review">
+        <div class="review-text">
+          <span class="r-stars">${'★'.repeat(r.rating||0)}${'☆'.repeat(5-(r.rating||0))}</span>${esc(r.text||'')}
+        </div>
+        <div class="review-meta">${esc(r.author_name||'')} · ${esc(r.relative_time_description||'')}</div>
+      </div>`).join('');
+    document.getElementById('reviewsPanel').style.display = 'block';
+  }
+
+  document.getElementById('genDate').textContent = new Date().toLocaleDateString('en-GB',
+    { day:'numeric', month:'long', year:'numeric' });
+
+  document.getElementById('report').style.display = 'block';
+  document.getElementById('report').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ── MAIN FLOW ─────────────────────────────────────────────────────────
+
+async function startAnalysis() {
+  const input     = document.getElementById('salonInput').value.trim();
+  const apiKey    = document.getElementById('apiKey').value.trim();
+  const manual    = {
+    ownerAge:   document.getElementById('ownerAge').value,
+    yearsOp:    document.getElementById('yearsOp').value,
+    staffCount: document.getElementById('staffCount').value,
+    willingness:document.getElementById('willingness').value,
+    notes:      document.getElementById('notes').value,
+  };
+
+  hide('errBox'); hide('report');
+  document.getElementById('reviewsPanel').style.display = 'none';
+
+  if (!input) { showErr('Enter a salon name or Google Maps link.'); return; }
+  if (!apiKey){ showErr('Enter your Google Places API key.'); return; }
+
+  document.getElementById('analyzeBtn').disabled = true;
+  show('loading');
+
+  try {
+    await loadMapsApi(apiKey);
+
+    let placeId = null;
+
+    // Check if input contains a place_id
+    const pidM = input.match(/place_id[=:]([A-Za-z0-9_-]+)/);
+    if (pidM) placeId = pidM[1];
+    if (!placeId && /^ChIJ/.test(input)) placeId = input;
+
+    let searchQuery = input;
+    if (!placeId && (input.includes('maps.google') || input.includes('google.com/maps'))) {
+      const name = nameFromUrl(input);
+      if (name) searchQuery = name;
+    }
+
+    if (!placeId) {
+      const found = await findPlace(searchQuery);
+      placeId = found.place_id;
+    }
+
+    const place  = await getDetails(placeId);
+    const nearby = await nearbySearch(place.geometry.location);
+
+    hide('loading');
+    renderReport(place, nearby, manual);
+  } catch(e) {
+    hide('loading');
+    showErr(e.message);
+  } finally {
+    document.getElementById('analyzeBtn').disabled = false;
+  }
+}
+
+function showErr(msg) {
+  const b = document.getElementById('errBox');
+  b.textContent = msg;
+  b.style.display = 'block';
+}
+function show(id) { document.getElementById(id).style.display = 'block'; }
+function hide(id) { document.getElementById(id).style.display = 'none'; }
+function resetView() {
+  hide('report');
+  document.getElementById('salonInput').focus();
+}
+
+document.getElementById('salonInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') startAnalysis();
+});
+</script>
+</body>
+</html>
