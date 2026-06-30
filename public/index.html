@@ -302,37 +302,33 @@
 </main>
 
 <script>
-// ── Google Maps JS API loader ─────────────────────────────────────────
-let mapsLoaded = false;
-let placesService = null;
+// ── Google Maps JS API loader (Places API New) ────────────────────────
+// Uses importLibrary("places") which targets Places API (New), not legacy.
+let PlaceClass = null;
 
 function loadMapsApi(key) {
   return new Promise((resolve, reject) => {
-    if (mapsLoaded && placesService) { resolve(); return; }
+    if (PlaceClass) { resolve(); return; }
     if (document.getElementById('gmaps-script')) {
-      // already loading, wait
       const wait = setInterval(() => {
-        if (window.google && window.google.maps && window.google.maps.places) {
-          clearInterval(wait);
-          initService();
-          resolve();
-        }
+        if (PlaceClass) { clearInterval(wait); resolve(); }
       }, 100);
       return;
     }
-    window.__mapsReady = () => { mapsLoaded = true; initService(); resolve(); };
+    window.__mapsBootstrap = async () => {
+      try {
+        const lib = await google.maps.importLibrary('places');
+        PlaceClass = lib.Place;
+        resolve();
+      } catch(e) { reject(e); }
+    };
     const s = document.createElement('script');
     s.id = 'gmaps-script';
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places&callback=__mapsReady`;
-    s.onerror = () => reject(new Error('Failed to load Google Maps API. Check that your API key is valid and the Maps JavaScript API + Places API are enabled.'));
+    // v=beta exposes importLibrary; loading=async defers execution
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&v=beta&loading=async&callback=__mapsBootstrap`;
+    s.onerror = () => reject(new Error('Failed to load Google Maps API. Verify your key and that Maps JavaScript API is enabled.'));
     document.head.appendChild(s);
   });
-}
-
-function initService() {
-  const mapEl = document.getElementById('map');
-  const map = new google.maps.Map(mapEl, { center: { lat: 41.3851, lng: 2.1734 }, zoom: 13 });
-  placesService = new google.maps.places.PlacesService(map);
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────
@@ -352,8 +348,9 @@ function starsHtml(n) {
   return s;
 }
 
+// New Places API: review text lives at review.text.text (TextContent object)
 function rtext(place) {
-  return (place.reviews || []).map(r => r.text || '').join(' ').toLowerCase();
+  return (place.reviews || []).map(r => r.text?.text || r.text || '').join(' ').toLowerCase();
 }
 
 // ── Extract name from Maps URL ─────────────────────────────────────────
@@ -367,45 +364,67 @@ function nameFromUrl(url) {
   return null;
 }
 
-// ── Places API wrappers (promise) ──────────────────────────────────────
-function findPlace(query) {
-  return new Promise((resolve, reject) => {
-    const req = {
-      query: /barcelona/i.test(query) ? query : query + ' Barcelona',
-      fields: ['place_id', 'name', 'geometry', 'formatted_address']
-    };
-    placesService.findPlaceFromQuery(req, (results, status) => {
-      if (status === google.maps.places.PlacesServiceStatus.OK && results?.length) {
-        resolve(results[0]);
-      } else if (status === 'REQUEST_DENIED') {
-        reject(new Error('API key rejected (REQUEST_DENIED). Fix: in Google Cloud Console, enable the Maps JavaScript API and Places API for your key, and make sure billing is activated on the project.'));
-      } else {
-        reject(new Error(`Could not find salon. Try a more specific name or paste the Google Maps URL. (Status: ${status})`));
-      }
+// ── Places API (New) wrappers ──────────────────────────────────────────
+const PLACE_FIELDS = [
+  'id','displayName','formattedAddress','location',
+  'rating','userRatingCount','priceLevel',
+  'regularOpeningHours','websiteURI','reviews',
+  'types','businessStatus','nationalPhoneNumber','photos'
+];
+
+async function searchPlace(query) {
+  const textQuery = /barcelona/i.test(query) ? query : `${query} Barcelona`;
+  let result;
+  try {
+    result = await PlaceClass.searchByText({
+      textQuery,
+      fields: PLACE_FIELDS,
+      languageCode: 'en',
+      regionCode: 'ES',
     });
-  });
+  } catch(e) {
+    const msg = e.message || '';
+    if (msg.includes('REQUEST_DENIED') || msg.includes('denied')) {
+      throw new Error('REQUEST_DENIED — check that Maps JavaScript API and Places API (New) are both enabled in Google Cloud Console, and that billing is active on the project.');
+    }
+    throw e;
+  }
+  const places = result?.places;
+  if (!places?.length) {
+    throw new Error('No salon found. Try a more specific name or paste the Google Maps URL directly.');
+  }
+  return places[0];
 }
 
-function getDetails(placeId) {
-  return new Promise((resolve, reject) => {
-    const fields = [
-      'name','rating','user_ratings_total','price_level',
-      'opening_hours','formatted_address','website','url',
-      'reviews','geometry','types','business_status','formatted_phone_number','photos'
-    ];
-    placesService.getDetails({ placeId, fields, language: 'en' }, (result, status) => {
-      if (status === google.maps.places.PlacesServiceStatus.OK) resolve(result);
-      else reject(new Error(`Could not load place details. (${status})`));
+async function searchNearby(location) {
+  try {
+    const result = await PlaceClass.searchNearby({
+      fields: ['id','types','displayName'],
+      locationRestriction: { center: location, radius: 400 },
     });
-  });
+    return result?.places || [];
+  } catch(_) {
+    return [];
+  }
 }
 
-function nearbySearch(location) {
-  return new Promise((resolve) => {
-    placesService.nearbySearch({ location, radius: 400 }, (results, status) => {
-      resolve(results || []);
-    });
-  });
+// Normalise New Places API field names to neutral keys used by scoring
+function normalisedPlace(p) {
+  return {
+    id:          p.id,
+    name:        p.displayName,
+    address:     p.formattedAddress,
+    location:    p.location,
+    rating:      p.rating,
+    reviewCount: p.userRatingCount,
+    website:     p.websiteURI,
+    reviews:     p.reviews || [],
+    types:       p.types || [],
+  };
+}
+
+function normalisedNearby(places) {
+  return places.map(p => ({ id: p.id, types: p.types || [] }));
 }
 
 // ── SCORING ───────────────────────────────────────────────────────────
@@ -456,7 +475,7 @@ function scoreLoyalty(place) {
   let score = 0, max = 9;
   const factors = [];
   const rating = place.rating || 0;
-  const rcount = place.user_ratings_total || 0;
+  const rcount = place.reviewCount || 0;
 
   if (rating >= 4.5)      { score += 3; factors.push(`Excellent rating: ${rating}/5`); }
   else if (rating >= 4.0) { score += 2; factors.push(`Good rating: ${rating}/5`); }
@@ -488,7 +507,7 @@ function scoreDigitalGap(place) {
   if (!place.website) {
     score += 2; factors.push('No website — significant digital gap');
   } else {
-    factors.push(`Has website`);
+    factors.push('Has website');
   }
 
   const rt = rtext(place);
@@ -499,7 +518,7 @@ function scoreDigitalGap(place) {
     factors.push('Online booking platform mentioned in reviews');
   }
 
-  if ((place.user_ratings_total || 0) < 40) {
+  if ((place.reviewCount || 0) < 40) {
     score += 1; factors.push('Low review count — limited digital visibility');
   }
 
@@ -510,17 +529,15 @@ function scoreDigitalGap(place) {
 function scoreLocation(place, nearby) {
   let score = 0, max = 5;
   const factors = [];
-  const myId = place.place_id;
+  const myId = place.id;
 
   const compTypes = new Set(['cafe','restaurant','food','bakery','pharmacy','drugstore',
     'gym','fitness_center','supermarket','grocery_or_supermarket','clothing_store',
     'shoe_store','shopping_mall','bank','convenience_store']);
   const salonTypes = new Set(['hair_care','beauty_salon','barber']);
 
-  const comps = nearby.filter(p =>
-    p.place_id !== myId && p.types?.some(t => compTypes.has(t)));
-  const rivals = nearby.filter(p =>
-    p.place_id !== myId && p.types?.some(t => salonTypes.has(t)));
+  const comps  = nearby.filter(p => p.id !== myId && p.types.some(t => compTypes.has(t)));
+  const rivals = nearby.filter(p => p.id !== myId && p.types.some(t => salonTypes.has(t)));
 
   if (comps.length >= 12)    { score += 3; factors.push(`Very high foot traffic: ${comps.length} complementary businesses within 400m`); }
   else if (comps.length >= 6){ score += 2; factors.push(`Good foot traffic: ${comps.length} complementary businesses nearby`); }
@@ -643,21 +660,22 @@ function renderReport(place, nearby, manual) {
   const ops = scoreFlags(place);
   const rec = buildRecommendation(suc, loy, dig, loc, ops);
 
-  document.getElementById('rName').textContent  = place.name || '';
-  document.getElementById('rAddr').textContent  = place.formatted_address || '';
+  // place here is the normalised object
+  document.getElementById('rName').textContent = place.name || '';
+  document.getElementById('rAddr').textContent = place.address || '';
   const rat = place.rating;
   if (rat) {
-    document.getElementById('rStars').textContent = starsHtml(rat);
+    document.getElementById('rStars').textContent  = starsHtml(rat);
     document.getElementById('rRating').textContent = rat.toFixed(1);
-    document.getElementById('rCount').textContent  = `${(place.user_ratings_total||0).toLocaleString()} reviews`;
+    document.getElementById('rCount').textContent  = `${(place.reviewCount || 0).toLocaleString()} reviews`;
   }
 
   const banner = document.getElementById('recBanner');
   banner.style.cssText = `background:${rec.bg};border:1px solid ${rec.border};border-radius:6px;padding:16px 20px;display:flex;align-items:flex-start;gap:18px;`;
   document.getElementById('recVerdict').style.color = rec.color;
-  document.getElementById('recVerdict').textContent  = rec.label;
-  document.getElementById('recReason').style.color   = rec.color;
-  document.getElementById('recReason').textContent   = rec.reason;
+  document.getElementById('recVerdict').textContent = rec.label;
+  document.getElementById('recReason').style.color  = rec.color;
+  document.getElementById('recReason').textContent  = rec.reason;
 
   const grid = document.getElementById('catGrid');
   grid.innerHTML =
@@ -673,20 +691,27 @@ function renderReport(place, nearby, manual) {
       true
     );
 
+  // Reviews: new Places API uses review.text.text and review.authorAttribution.displayName
   const reviews = place.reviews || [];
   if (reviews.length) {
-    document.getElementById('reviewsList').innerHTML = reviews.map(r => `
-      <div class="review">
-        <div class="review-text">
-          <span class="r-stars">${'★'.repeat(r.rating||0)}${'☆'.repeat(5-(r.rating||0))}</span>${esc(r.text||'')}
-        </div>
-        <div class="review-meta">${esc(r.author_name||'')} · ${esc(r.relative_time_description||'')}</div>
-      </div>`).join('');
+    document.getElementById('reviewsList').innerHTML = reviews.map(r => {
+      const text   = r.text?.text || r.text || '';
+      const author = r.authorAttribution?.displayName || r.author_name || '';
+      const time   = r.relativePublishTimeDescription || r.relative_time_description || '';
+      const stars  = r.rating || 0;
+      return `
+        <div class="review">
+          <div class="review-text">
+            <span class="r-stars">${'★'.repeat(stars)}${'☆'.repeat(5 - stars)}</span>${esc(text)}
+          </div>
+          <div class="review-meta">${esc(author)} · ${esc(time)}</div>
+        </div>`;
+    }).join('');
     document.getElementById('reviewsPanel').style.display = 'block';
   }
 
   document.getElementById('genDate').textContent = new Date().toLocaleDateString('en-GB',
-    { day:'numeric', month:'long', year:'numeric' });
+    { day: 'numeric', month: 'long', year: 'numeric' });
 
   document.getElementById('report').style.display = 'block';
   document.getElementById('report').scrollIntoView({ behavior: 'smooth' });
@@ -695,21 +720,21 @@ function renderReport(place, nearby, manual) {
 // ── MAIN FLOW ─────────────────────────────────────────────────────────
 
 async function startAnalysis() {
-  const input     = document.getElementById('salonInput').value.trim();
-  const apiKey    = document.getElementById('apiKey').value.trim();
-  const manual    = {
-    ownerAge:   document.getElementById('ownerAge').value,
-    yearsOp:    document.getElementById('yearsOp').value,
-    staffCount: document.getElementById('staffCount').value,
-    willingness:document.getElementById('willingness').value,
-    notes:      document.getElementById('notes').value,
+  const input    = document.getElementById('salonInput').value.trim();
+  const apiKey   = document.getElementById('apiKey').value.trim();
+  const manual   = {
+    ownerAge:    document.getElementById('ownerAge').value,
+    yearsOp:     document.getElementById('yearsOp').value,
+    staffCount:  document.getElementById('staffCount').value,
+    willingness: document.getElementById('willingness').value,
+    notes:       document.getElementById('notes').value,
   };
 
   hide('errBox'); hide('report');
   document.getElementById('reviewsPanel').style.display = 'none';
 
-  if (!input) { showErr('Enter a salon name or Google Maps link.'); return; }
-  if (!apiKey){ showErr('Enter your Google Places API key.'); return; }
+  if (!input)  { showErr('Enter a salon name or Google Maps link.'); return; }
+  if (!apiKey) { showErr('Enter your Google Places API key.'); return; }
 
   document.getElementById('analyzeBtn').disabled = true;
   show('loading');
@@ -717,26 +742,16 @@ async function startAnalysis() {
   try {
     await loadMapsApi(apiKey);
 
-    let placeId = null;
-
-    // Check if input contains a place_id
-    const pidM = input.match(/place_id[=:]([A-Za-z0-9_-]+)/);
-    if (pidM) placeId = pidM[1];
-    if (!placeId && /^ChIJ/.test(input)) placeId = input;
-
+    // Extract plain-text query from Maps URLs
     let searchQuery = input;
-    if (!placeId && (input.includes('maps.google') || input.includes('google.com/maps'))) {
-      const name = nameFromUrl(input);
-      if (name) searchQuery = name;
+    if (input.includes('maps.google') || input.includes('google.com/maps')) {
+      searchQuery = nameFromUrl(input) || input;
     }
 
-    if (!placeId) {
-      const found = await findPlace(searchQuery);
-      placeId = found.place_id;
-    }
-
-    const place  = await getDetails(placeId);
-    const nearby = await nearbySearch(place.geometry.location);
+    const rawPlace  = await searchPlace(searchQuery);
+    const place     = normalisedPlace(rawPlace);
+    const rawNearby = await searchNearby(rawPlace.location);
+    const nearby    = normalisedNearby(rawNearby);
 
     hide('loading');
     renderReport(place, nearby, manual);
