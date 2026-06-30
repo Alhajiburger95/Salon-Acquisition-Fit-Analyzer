@@ -5,228 +5,242 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Salon Acquisition Fit Analyzer</title>
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f4f4f4;color:#1a1a1a;min-height:100vh}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* HEADER */
-header{background:#111;color:#fff;padding:18px 32px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
-header h1{font-size:17px;font-weight:700;letter-spacing:-.3px}
-header span{font-size:12px;color:#666}
-.history-btn{font-size:12px;color:#aaa;background:none;border:1px solid #333;border-radius:4px;padding:5px 12px;cursor:pointer}
-.history-btn:hover{border-color:#666;color:#fff}
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f5f5f5;
+    color: #1a1a1a;
+    min-height: 100vh;
+  }
 
-/* LAYOUT */
-main{max-width:920px;margin:0 auto;padding:28px 20px}
+  header {
+    background: #1a1a1a;
+    color: #fff;
+    padding: 20px 32px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  header h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
+  header span { font-size: 13px; color: #888; }
 
-/* PANELS */
-.panel{background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:26px;margin-bottom:18px}
-.panel h2{font-size:14px;font-weight:700;margin-bottom:18px;color:#111}
+  main { max-width: 880px; margin: 0 auto; padding: 32px 24px; }
 
-/* FIELDS */
-.field{margin-bottom:14px}
-.field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#777;margin-bottom:4px}
-.field label .auto-tag{font-size:10px;font-weight:600;color:#2563eb;background:#eff6ff;border-radius:3px;padding:1px 6px;margin-left:6px;letter-spacing:.3px}
-.field input,.field select,.field textarea{width:100%;padding:9px 12px;border:1px solid #d4d4d4;border-radius:5px;font-size:14px;color:#111;background:#fff}
-.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:#111}
-.field textarea{resize:vertical;min-height:64px}
-.field-note{font-size:11px;color:#999;margin-top:3px}
-.field input.auto-filled{border-color:#bfdbfe;background:#f0f7ff}
+  /* ── INPUT PANEL ── */
+  .panel {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+  .panel h2 { font-size: 15px; font-weight: 600; margin-bottom: 20px; }
 
-.section-rule{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#bbb;margin:20px 0 14px;border-top:1px solid #eee;padding-top:18px;display:flex;align-items:center;gap:8px}
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #666;
+    margin-bottom: 5px;
+  }
+  .field input, .field select, .field textarea {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid #d0d0d0;
+    border-radius: 5px;
+    font-size: 14px;
+    color: #1a1a1a;
+    background: #fff;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    outline: none; border-color: #1a1a1a;
+  }
+  .field textarea { resize: vertical; min-height: 68px; }
+  .field-note { font-size: 12px; color: #999; margin-top: 4px; }
 
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+  .section-rule {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.8px; color: #aaa;
+    margin: 22px 0 14px; border-top: 1px solid #eee; padding-top: 18px;
+  }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
 
-/* BUTTONS */
-.btn{border:none;border-radius:5px;padding:11px 24px;font-size:14px;font-weight:600;cursor:pointer;letter-spacing:.1px;transition:background .15s}
-.btn-primary{background:#111;color:#fff}
-.btn-primary:hover{background:#333}
-.btn-primary:disabled{background:#bbb;cursor:not-allowed}
-.btn-ghost{background:transparent;color:#111;border:1px solid #ccc;padding:9px 18px;font-size:13px}
-.btn-ghost:hover{border-color:#111}
+  .btn-primary {
+    margin-top: 20px;
+    background: #1a1a1a; color: #fff;
+    border: none; border-radius: 5px;
+    padding: 12px 28px; font-size: 14px; font-weight: 600;
+    cursor: pointer; letter-spacing: 0.2px;
+  }
+  .btn-primary:disabled { background: #bbb; cursor: not-allowed; }
 
-/* STATUS */
-.error-box{background:#fef2f2;border:1px solid #fecaca;color:#991b1b;border-radius:6px;padding:12px 16px;font-size:13px;margin-bottom:14px;display:none}
-.loading{text-align:center;padding:44px;color:#888;font-size:13px;display:none}
-.spinner{width:28px;height:28px;border:3px solid #eee;border-top-color:#111;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px}
-@keyframes spin{to{transform:rotate(360deg)}}
+  .btn-ghost {
+    background: transparent; color: #1a1a1a;
+    border: 1px solid #ccc; border-radius: 5px;
+    padding: 9px 18px; font-size: 13px; cursor: pointer;
+    margin-left: 10px;
+  }
+  .btn-ghost:hover { border-color: #1a1a1a; }
 
-/* STEP 2 CONFIRM */
-.confirm-panel{display:none}
-.confirm-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
-.confirm-header h2{font-size:14px;font-weight:700;color:#111}
-.badge-auto{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;background:#dcfce7;color:#15803d;border-radius:4px;padding:3px 8px}
+  /* ── STATUS ── */
+  .error-box {
+    background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;
+    border-radius: 6px; padding: 12px 16px; font-size: 14px;
+    margin-bottom: 18px; display: none;
+  }
+  .loading {
+    text-align: center; padding: 48px; color: #888; font-size: 14px; display: none;
+  }
+  .spinner {
+    width: 30px; height: 30px;
+    border: 3px solid #e0e0e0; border-top-color: #1a1a1a;
+    border-radius: 50%; animation: spin 0.7s linear infinite;
+    margin: 0 auto 14px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-/* REPORT */
-#report{display:none}
+  /* ── REPORT ── */
+  #report { display: none; }
 
-.report-header{background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:22px 26px;margin-bottom:14px}
-.report-top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:16px}
-.salon-name{font-size:21px;font-weight:800;letter-spacing:-.4px}
-.salon-sub{font-size:12px;color:#888;margin-top:3px}
-.salon-links{display:flex;gap:10px;margin-top:6px;flex-wrap:wrap}
-.salon-links a{font-size:12px;color:#2563eb;text-decoration:none}
-.salon-links a:hover{text-decoration:underline}
-.rating-block{text-align:right}
-.r-stars{color:#f59e0b;font-size:17px}
-.r-num{font-size:22px;font-weight:800}
-.r-count{font-size:12px;color:#999}
+  .report-header {
+    background: #fff; border: 1px solid #e0e0e0;
+    border-radius: 8px; padding: 24px 28px; margin-bottom: 14px;
+  }
+  .report-top {
+    display: flex; justify-content: space-between;
+    align-items: flex-start; flex-wrap: wrap; gap: 12px;
+    margin-bottom: 18px;
+  }
+  .salon-name { font-size: 22px; font-weight: 700; letter-spacing: -0.4px; }
+  .salon-address { font-size: 13px; color: #666; margin-top: 3px; }
+  .rating-block { text-align: right; }
+  .rating-stars { color: #f59e0b; font-size: 16px; }
+  .rating-num { font-size: 22px; font-weight: 700; }
+  .rating-count { font-size: 13px; color: #888; }
 
-.rec-banner{border-radius:7px;padding:16px 20px;display:flex;align-items:flex-start;gap:18px;margin-bottom:0}
-.rec-verdict{font-size:26px;font-weight:900;letter-spacing:-.5px;white-space:nowrap}
-.rec-reason{font-size:13px;line-height:1.55;padding-top:5px}
+  .rec-banner {
+    border-radius: 6px; padding: 16px 20px;
+    display: flex; align-items: flex-start; gap: 18px;
+  }
+  .rec-verdict { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; white-space: nowrap; }
+  .rec-reason { font-size: 14px; line-height: 1.55; padding-top: 4px; }
 
-/* STATS ROW */
-.stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}
-.stat-card{background:#fff;border:1px solid #e0e0e0;border-radius:7px;padding:14px 16px;text-align:center}
-.stat-val{font-size:20px;font-weight:800;letter-spacing:-.3px}
-.stat-label{font-size:11px;color:#888;margin-top:3px;font-weight:500}
-.stat-auto{font-size:10px;color:#2563eb;margin-top:2px}
+  /* ── CATEGORIES ── */
+  .cat-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 14px; margin-bottom: 14px;
+  }
+  .cat-card {
+    background: #fff; border: 1px solid #e0e0e0;
+    border-radius: 8px; padding: 20px 22px;
+  }
+  .cat-card.full { grid-column: 1 / -1; }
+  .cat-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .cat-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #555; }
+  .badge {
+    font-size: 11px; font-weight: 700; padding: 3px 10px;
+    border-radius: 20px; letter-spacing: 0.3px;
+  }
+  .badge-green  { background: #dcfce7; color: #15803d; }
+  .badge-yellow { background: #fef9c3; color: #854d0e; }
+  .badge-red    { background: #fee2e2; color: #991b1b; }
+  .badge-gray   { background: #f1f5f9; color: #64748b; }
 
-/* REPORT BODY */
-.report-body{display:grid;grid-template-columns:280px 1fr;gap:14px;margin-bottom:14px}
-.radar-card{background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:18px;display:flex;flex-direction:column;align-items:center}
-.radar-card h3{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#888;margin-bottom:12px;align-self:flex-start}
-.cats-col{display:flex;flex-direction:column;gap:10px}
+  .score-bar { height: 4px; background: #eee; border-radius: 2px; margin-bottom: 12px; overflow: hidden; }
+  .score-fill { height: 100%; border-radius: 2px; }
 
-/* CATEGORY CARDS */
-.cat-card{background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:16px 18px}
-.cat-card.full{grid-column:1/-1}
-.cat-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.cat-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#666}
-.badge{font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;letter-spacing:.3px}
-.badge-green{background:#dcfce7;color:#15803d}
-.badge-yellow{background:#fef9c3;color:#854d0e}
-.badge-red{background:#fee2e2;color:#991b1b}
-.badge-gray{background:#f1f5f9;color:#64748b}
-.score-bar{height:3px;background:#eee;border-radius:2px;margin-bottom:10px;overflow:hidden}
-.score-fill{height:100%;border-radius:2px;transition:width .6s ease}
-.factors{list-style:none}
-.factors li{font-size:12px;color:#555;padding:2px 0 2px 12px;position:relative;line-height:1.4}
-.factors li::before{content:'·';position:absolute;left:0;color:#ccc;font-size:14px;line-height:1;top:3px}
+  .factors { list-style: none; }
+  .factors li {
+    font-size: 13px; color: #555; padding: 3px 0 3px 14px;
+    position: relative; line-height: 1.4;
+  }
+  .factors li::before {
+    content: '·'; position: absolute; left: 0;
+    color: #ccc; font-size: 16px; line-height: 1; top: 4px;
+  }
 
-/* BOTTOM PANELS */
-.bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
-.sub-panel{background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:18px}
-.sub-panel.full{grid-column:1/-1}
-.sub-panel h3{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#888;margin-bottom:12px}
+  /* ── REVIEWS ── */
+  .reviews-panel {
+    background: #fff; border: 1px solid #e0e0e0;
+    border-radius: 8px; padding: 20px 22px; margin-bottom: 14px;
+    display: none;
+  }
+  .reviews-panel h3 {
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.7px; color: #555; margin-bottom: 14px;
+  }
+  .review { border-top: 1px solid #f0f0f0; padding: 11px 0; }
+  .review:first-child { border-top: none; padding-top: 0; }
+  .review-text { font-size: 13px; color: #444; line-height: 1.5; }
+  .review-meta { font-size: 11px; color: #aaa; margin-top: 5px; }
+  .r-stars { color: #f59e0b; font-size: 12px; margin-right: 6px; }
 
-/* THEMES */
-.themes{display:flex;flex-wrap:wrap;gap:7px}
-.theme-tag{font-size:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:20px;padding:4px 11px;color:#475569}
+  .footnote { font-size: 12px; color: #aaa; text-align: center; margin-top: 6px; }
 
-/* RIVALS TABLE */
-.rivals-table{width:100%;border-collapse:collapse;font-size:12px}
-.rivals-table th{text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#aaa;padding:4px 8px 8px;border-bottom:1px solid #eee}
-.rivals-table td{padding:7px 8px;border-bottom:1px solid #f5f5f5;color:#444;vertical-align:middle}
-.rivals-table tr:last-child td{border-bottom:none}
-.rival-stars{color:#f59e0b;font-size:11px}
-.rival-badge{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
+  /* hidden map div required by Places API */
+  #map { display: none; }
 
-/* REVIEWS */
-.review{border-top:1px solid #f0f0f0;padding:10px 0}
-.review:first-child{border-top:none;padding-top:0}
-.review-text{font-size:12px;color:#444;line-height:1.5}
-.review-meta{font-size:10px;color:#bbb;margin-top:4px}
-.rev-stars{color:#f59e0b;font-size:11px;margin-right:4px}
-
-/* FLAGS */
-.flags-list{display:flex;flex-direction:column;gap:5px}
-.flag-item{font-size:12px;color:#991b1b;background:#fef2f2;border-radius:4px;padding:5px 10px}
-.no-flags{font-size:12px;color:#15803d;background:#f0fdf4;border-radius:4px;padding:8px 12px}
-
-/* HISTORY DRAWER */
-.history-drawer{display:none;position:fixed;top:0;right:0;width:320px;height:100vh;background:#fff;border-left:1px solid #e0e0e0;z-index:100;overflow-y:auto;box-shadow:-4px 0 20px rgba(0,0,0,.1)}
-.history-inner{padding:20px}
-.history-inner h2{font-size:14px;font-weight:700;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
-.history-close{background:none;border:none;font-size:18px;cursor:pointer;color:#888}
-.history-item{border:1px solid #eee;border-radius:6px;padding:12px;margin-bottom:10px;cursor:pointer}
-.history-item:hover{border-color:#ccc}
-.history-name{font-size:13px;font-weight:600}
-.history-meta{font-size:11px;color:#999;margin-top:3px}
-.history-rec{font-size:11px;font-weight:700;margin-top:4px}
-.history-empty{font-size:13px;color:#aaa;text-align:center;padding:30px 0}
-#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:99}
-
-/* FOOTNOTE */
-.footnote{font-size:11px;color:#bbb;text-align:center;margin-top:6px}
-
-/* hidden map div */
-#map{display:none}
-
-@media print{
-  body{background:#fff}
-  header{background:#111!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .no-print,.panel.no-print,.history-drawer,#overlay{display:none!important}
-  #report{display:block!important}
-  .report-body{grid-template-columns:220px 1fr}
-  .bottom-grid{grid-template-columns:1fr 1fr}
-  .rec-banner,.badge{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .stats-row{grid-template-columns:repeat(5,1fr)}
-}
+  @media print {
+    body { background: #fff; }
+    header { background: #1a1a1a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .no-print, .panel { display: none !important; }
+    #report { display: block !important; }
+    .rec-banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .cat-grid { grid-template-columns: 1fr 1fr; }
+    .cat-card, .report-header { break-inside: avoid; }
+  }
 </style>
 </head>
 <body>
-<div id="map"></div>
-<div id="overlay" onclick="closeHistory()"></div>
-
-<div class="history-drawer" id="historyDrawer">
-  <div class="history-inner">
-    <h2>Recent Analyses <button class="history-close" onclick="closeHistory()">✕</button></h2>
-    <div id="historyList"></div>
-  </div>
-</div>
 
 <header>
-  <div>
-    <h1>Salon Acquisition Fit Analyzer</h1>
-    <span>Barcelona Roll-Up · Pre-Acquisition Screening</span>
-  </div>
-  <button class="history-btn no-print" onclick="openHistory()">Recent ▾</button>
+  <h1>Salon Acquisition Fit Analyzer</h1>
+  <span>Barcelona Roll-Up · Pre-Acquisition Screening</span>
 </header>
+
+<div id="map"></div>
 
 <main>
 
-<!-- STEP 1: INPUT -->
-<div class="panel no-print" id="step1">
-  <h2>Target Salon</h2>
-  <div class="field">
-    <label>Salon Name or Google Maps URL</label>
-    <input id="salonInput" type="text" placeholder="e.g. Peluquería Can Barret  or  paste a Google Maps link" />
-  </div>
-  <div class="field">
-    <label>Google Places API Key</label>
-    <input id="apiKey" type="password" placeholder="AIza…" />
-    <div class="field-note">Stays in your browser — only sent directly to Google's API.</div>
-  </div>
-  <button class="btn btn-primary" id="fetchBtn" onclick="fetchData()" style="margin-top:8px">Fetch Salon Data →</button>
-</div>
+  <!-- INPUT PANEL -->
+  <div class="panel no-print" id="inputPanel">
+    <h2>Target Salon</h2>
 
-<!-- STEP 2: CONFIRM AUTO-DETECTED + MANUAL -->
-<div class="panel confirm-panel no-print" id="step2">
-  <div class="confirm-header">
-    <h2>Confirm Details</h2>
-    <span class="badge-auto">✦ Auto-detected where possible</span>
-  </div>
+    <div class="field">
+      <label>Salon Name or Google Maps URL</label>
+      <input id="salonInput" type="text"
+        placeholder="e.g. Peluquería Can Barret  or  paste a Google Maps link" />
+    </div>
 
-  <div class="grid-3">
     <div class="field">
-      <label>Owner Estimated Age</label>
-      <input id="ownerAge" type="number" placeholder="e.g. 58 (manual)" min="18" max="90" />
+      <label>Google Places API Key</label>
+      <input id="apiKey" type="password" placeholder="AIza…" />
+      <div class="field-note">Stays in your browser — only sent directly to Google's API.</div>
     </div>
-    <div class="field">
-      <label>Years in Operation <span class="auto-tag">AUTO</span></label>
-      <input id="yearsOp" type="number" placeholder="detecting…" min="0" max="80" />
-    </div>
-    <div class="field">
-      <label>Staff Count <span class="auto-tag">AUTO</span></label>
-      <input id="staffCount" type="number" placeholder="detecting…" min="1" max="50" />
-    </div>
-  </div>
 
-  <div class="grid-2">
+    <div class="section-rule">Manual Intelligence (not publicly available)</div>
+
+    <div class="grid-3">
+      <div class="field">
+        <label>Owner Estimated Age</label>
+        <input id="ownerAge" type="number" placeholder="e.g. 58" min="18" max="90" />
+      </div>
+      <div class="field">
+        <label>Years in Operation</label>
+        <input id="yearsOp" type="number" placeholder="e.g. 18" min="0" max="80" />
+      </div>
+      <div class="field">
+        <label>Staff Count</label>
+        <input id="staffCount" type="number" placeholder="e.g. 4" min="1" max="50" />
+      </div>
+    </div>
+
     <div class="field">
-      <label>Willingness to Sell</label>
+      <label>Owner Willingness to Sell</label>
       <select id="willingness">
         <option value="unknown">Unknown</option>
         <option value="open">Open to discussion</option>
@@ -234,108 +248,71 @@ main{max-width:920px;margin:0 auto;padding:28px 20px}
         <option value="no">Not interested</option>
       </select>
     </div>
+
     <div class="field">
-      <label>Online Booking Platform <span class="auto-tag">AUTO</span></label>
-      <input id="bookingPlatform" type="text" placeholder="detecting…" readonly style="background:#f9f9f9;color:#555" />
+      <label>Site Visit / Conversation Notes</label>
+      <textarea id="notes" placeholder="Anything observed in person — owner age, vibe, staffing, signage, condition of space…"></textarea>
     </div>
+
+    <button class="btn-primary" id="analyzeBtn" onclick="startAnalysis()">Analyze Salon</button>
   </div>
 
-  <div class="field">
-    <label>Site Visit / Conversation Notes</label>
-    <textarea id="notes" placeholder="Observations from visiting — owner vibe, condition of space, staff age, signage…"></textarea>
-  </div>
+  <div class="error-box" id="errBox"></div>
+  <div class="loading" id="loading"><div class="spinner"></div>Pulling data from Google Places…</div>
 
-  <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap">
-    <button class="btn btn-primary" id="analyzeBtn" onclick="runAnalysis()">Generate Report</button>
-    <button class="btn btn-ghost" onclick="resetAll()">← Start Over</button>
-  </div>
-</div>
+  <!-- REPORT -->
+  <div id="report">
 
-<div class="error-box" id="errBox"></div>
-<div class="loading" id="loading"><div class="spinner"></div><span id="loadingMsg">Fetching data from Google Places…</span></div>
-
-<!-- REPORT -->
-<div id="report">
-
-  <!-- HEADER -->
-  <div class="report-header">
-    <div class="report-top">
-      <div>
-        <div class="salon-name" id="rName"></div>
-        <div class="salon-sub" id="rAddr"></div>
-        <div class="salon-links" id="rLinks"></div>
+    <div class="report-header">
+      <div class="report-top">
+        <div>
+          <div class="salon-name" id="rName"></div>
+          <div class="salon-address" id="rAddr"></div>
+        </div>
+        <div class="rating-block">
+          <div class="rating-stars" id="rStars"></div>
+          <div><span class="rating-num" id="rRating"></span></div>
+          <div class="rating-count" id="rCount"></div>
+        </div>
       </div>
-      <div class="rating-block">
-        <div class="r-stars" id="rStars"></div>
-        <div class="r-num" id="rRating"></div>
-        <div class="r-count" id="rCount"></div>
+      <div class="rec-banner" id="recBanner">
+        <div class="rec-verdict" id="recVerdict"></div>
+        <div class="rec-reason" id="recReason"></div>
       </div>
     </div>
-    <div class="rec-banner" id="recBanner">
-      <div class="rec-verdict" id="recVerdict"></div>
-      <div class="rec-reason" id="recReason"></div>
-    </div>
-  </div>
 
-  <!-- STATS ROW -->
-  <div class="stats-row">
-    <div class="stat-card"><div class="stat-val" id="sRating">—</div><div class="stat-label">Google Rating</div></div>
-    <div class="stat-card"><div class="stat-val" id="sReviews">—</div><div class="stat-label">Reviews</div></div>
-    <div class="stat-card"><div class="stat-val" id="sYears">—</div><div class="stat-label">Yrs Operating</div><div class="stat-auto" id="sYearsNote"></div></div>
-    <div class="stat-card"><div class="stat-val" id="sStaff">—</div><div class="stat-label">Staff (est.)</div><div class="stat-auto" id="sStaffNote"></div></div>
-    <div class="stat-card"><div class="stat-val" id="sDigital">—</div><div class="stat-label">Digital Score</div></div>
-  </div>
+    <div class="cat-grid" id="catGrid"></div>
 
-  <!-- RADAR + CATEGORIES -->
-  <div class="report-body">
-    <div class="radar-card">
-      <h3>Score Radar</h3>
-      <svg id="radarSvg" viewBox="0 0 260 260" width="240" height="240"></svg>
-      <div style="margin-top:10px;width:100%">
-        <div id="radarLegend" style="display:flex;flex-direction:column;gap:5px"></div>
-      </div>
-    </div>
-    <div class="cats-col" id="catsCol"></div>
-  </div>
-
-  <!-- BOTTOM -->
-  <div class="bottom-grid">
-    <div class="sub-panel" id="rivalsPanel">
-      <h3>Nearby Rivals</h3>
-      <table class="rivals-table" id="rivalsTable"></table>
-    </div>
-    <div class="sub-panel" id="themesPanel">
-      <h3>Review Themes</h3>
-      <div class="themes" id="themesList"></div>
-      <div style="margin-top:14px" id="flagsBlock"></div>
-    </div>
-    <div class="sub-panel full" id="reviewsPanel" style="display:none">
-      <h3>Review Samples <span style="font-weight:400;color:#ccc;font-size:10px">(up to 5 from Google)</span></h3>
+    <div class="reviews-panel" id="reviewsPanel">
+      <h3>Review Samples (up to 5 most recent in English)</h3>
       <div id="reviewsList"></div>
     </div>
+
+    <div class="footnote">
+      Generated <span id="genDate"></span> · Data: Google Places API · Reviews capped at 5 per query
+    </div>
+
+    <div style="margin-top:16px" class="no-print">
+      <button class="btn-primary" onclick="window.print()">Print / Save PDF</button>
+      <button class="btn-ghost" onclick="resetView()">← New Analysis</button>
+    </div>
+
   </div>
 
-  <div class="footnote">Generated <span id="genDate"></span> · Google Places API (New) · Reviews capped at 5 per query</div>
-
-  <div style="margin-top:14px" class="no-print">
-    <button class="btn btn-primary" onclick="window.print()">Print / Save PDF</button>
-    <button class="btn btn-ghost" onclick="resetAll()">← New Analysis</button>
-  </div>
-
-</div>
 </main>
 
 <script>
-// ─────────────────────────────────────────────────────────────────────
-//  MAPS API LOADER  (Places API New via importLibrary)
-// ─────────────────────────────────────────────────────────────────────
+// ── Google Maps JS API loader (Places API New) ────────────────────────
+// Uses importLibrary("places") which targets Places API (New), not legacy.
 let PlaceClass = null;
 
 function loadMapsApi(key) {
   return new Promise((resolve, reject) => {
     if (PlaceClass) { resolve(); return; }
     if (document.getElementById('gmaps-script')) {
-      const t = setInterval(() => { if (PlaceClass) { clearInterval(t); resolve(); } }, 80);
+      const wait = setInterval(() => {
+        if (PlaceClass) { clearInterval(wait); resolve(); }
+      }, 100);
       return;
     }
     window.__mapsBootstrap = async () => {
@@ -347,27 +324,36 @@ function loadMapsApi(key) {
     };
     const s = document.createElement('script');
     s.id = 'gmaps-script';
+    // v=beta exposes importLibrary; loading=async defers execution
     s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&v=beta&loading=async&callback=__mapsBootstrap`;
-    s.onerror = () => reject(new Error('Maps JS API failed to load. Check your API key and that Maps JavaScript API is enabled.'));
+    s.onerror = () => reject(new Error('Failed to load Google Maps API. Verify your key and that Maps JavaScript API is enabled.'));
     document.head.appendChild(s);
   });
 }
 
-// ─────────────────────────────────────────────────────────────────────
-//  HELPERS
-// ─────────────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────
 function esc(s) {
-  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s ?? '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
 function starsHtml(n) {
   n = Math.round(n * 2) / 2;
   let s = '';
-  for (let i = 1; i <= 5; i++) s += (i <= n ? '★' : i - .5 === n ? '½' : '☆');
+  for (let i = 1; i <= 5; i++) {
+    if (i <= n) s += '★';
+    else if (i - 0.5 === n) s += '½';
+    else s += '☆';
+  }
   return s;
 }
-function reviewsText(place) {
+
+// New Places API: review text lives at review.text.text (TextContent object)
+function rtext(place) {
   return (place.reviews || []).map(r => r.text?.text || r.text || '').join(' ').toLowerCase();
 }
+
+// ── Extract name from Maps URL ─────────────────────────────────────────
 function nameFromUrl(url) {
   try {
     const m = url.match(/\/maps\/place\/([^/@?&]+)/);
@@ -378,10 +364,8 @@ function nameFromUrl(url) {
   return null;
 }
 
-// ─────────────────────────────────────────────────────────────────────
-//  PLACES API CALLS
-// ─────────────────────────────────────────────────────────────────────
-const FIELDS = [
+// ── Places API (New) wrappers ──────────────────────────────────────────
+const PLACE_FIELDS = [
   'id','displayName','formattedAddress','location',
   'rating','userRatingCount','priceLevel',
   'regularOpeningHours','websiteURI','reviews',
@@ -392,123 +376,40 @@ async function searchPlace(query) {
   const textQuery = /barcelona/i.test(query) ? query : `${query} Barcelona`;
   let result;
   try {
-    result = await PlaceClass.searchByText({ textQuery, fields: FIELDS, language: 'en', region: 'ES' });
+    result = await PlaceClass.searchByText({
+      textQuery,
+      fields: PLACE_FIELDS,
+      language: 'en',
+      region: 'ES',
+    });
   } catch(e) {
-    const m = e.message || '';
-    if (/denied|REQUEST_DENIED/i.test(m)) throw new Error('REQUEST_DENIED — enable Maps JavaScript API + Places API (New) in Google Cloud Console, and make sure billing is active.');
+    const msg = e.message || '';
+    if (msg.includes('REQUEST_DENIED') || msg.includes('denied')) {
+      throw new Error('REQUEST_DENIED — check that Maps JavaScript API and Places API (New) are both enabled in Google Cloud Console, and that billing is active on the project.');
+    }
     throw e;
   }
-  if (!result?.places?.length) throw new Error('No salon found. Try a more specific name or paste the Google Maps URL directly.');
-  return result.places[0];
+  const places = result?.places;
+  if (!places?.length) {
+    throw new Error('No salon found. Try a more specific name or paste the Google Maps URL directly.');
+  }
+  return places[0];
 }
 
 async function searchNearby(location) {
   try {
-    const r = await PlaceClass.searchNearby({ fields: ['id','types','displayName','rating','userRatingCount'], locationRestriction: { center: location, radius: 400 } });
-    return r?.places || [];
-  } catch(_) { return []; }
-}
-
-// ─────────────────────────────────────────────────────────────────────
-//  AUTO-DETECTION
-// ─────────────────────────────────────────────────────────────────────
-function autoDetectYears(place) {
-  // From review relative timestamps
-  let max = 0;
-  for (const r of (place.reviews || [])) {
-    const d = r.relativePublishTimeDescription || '';
-    const ym = d.match(/(\d+)\s+year/); if (ym) max = Math.max(max, +ym[1]);
-    const mm = d.match(/(\d+)\s+month/); if (mm) max = Math.max(max, +mm[1] / 12);
+    const result = await PlaceClass.searchNearby({
+      fields: ['id','types','displayName'],
+      locationRestriction: { center: location, radius: 400 },
+    });
+    return result?.places || [];
+  } catch(_) {
+    return [];
   }
-  // From review text patterns
-  const rt = reviewsText(place);
-  const pats = [
-    /(?:been coming|been going|coming here|going here)[^.]{0,20}(\d+)\s+years?/g,
-    /for\s+(?:over\s+)?(\d+)\s+years?/g,
-    /since\s+(20\d{2}|19\d{2})/g,
-    /hace\s+(\d+)\s+a[ñn]os?/g,
-    /(\d+)\s+a[ñn]os?.*(?:peluquer|barbería|salón)/g,
-  ];
-  for (const p of pats) {
-    let m;
-    while ((m = p.exec(rt)) !== null) {
-      const v = +m[1] > 1900 ? new Date().getFullYear() - +m[1] : +m[1];
-      if (v > 0 && v < 80) max = Math.max(max, v);
-    }
-  }
-  return max > 0 ? Math.round(max) : null;
 }
 
-function autoDetectStaff(place) {
-  const rt = reviewsText(place);
-  // Extract names following stylist/barber indicator words
-  const indicators = /(?:stylist|barber|hairdresser|peluquer[ao]|barbero|estilista|coiffeur|asked for|con\s+)\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]{2,12})/g;
-  const names = new Set();
-  let m;
-  while ((m = indicators.exec(rt)) !== null) names.add(m[1].toLowerCase());
-  // Also count unique first names in 5 reviews as rough proxy
-  for (const r of (place.reviews || [])) {
-    const name = r.authorAttribution?.displayName || '';
-    // Not reliable for staff — skip author names
-  }
-  return names.size >= 2 ? names.size : null;
-}
-
-function autoDetectBooking(place) {
-  const rt = reviewsText(place);
-  const site = (place.websiteURI || '').toLowerCase();
-  const combined = rt + ' ' + site;
-  const platforms = [
-    ['Treatwell', 'treatwell'],
-    ['Booksy', 'booksy'],
-    ['Fresha', 'fresha'],
-    ['Vagaro', 'vagaro'],
-    ['SimplyBook', 'simplybook'],
-    ['Appointy', 'appointy'],
-    ['Planity', 'planity'],
-    ['StyleSeat', 'styleseat'],
-  ];
-  for (const [name, kw] of platforms) if (combined.includes(kw)) return name;
-  if (/book online|online booking|reserva online|reservar cita/i.test(combined)) return 'Online booking (platform unclear)';
-  return null;
-}
-
-function autoDetectThemes(place) {
-  const rt = reviewsText(place);
-  const candidates = [
-    { label: 'Great atmosphere', kws: ['atmosphere','ambiente','cozy','acogedor','ambiente'] },
-    { label: 'Friendly staff', kws: ['friendly','amable','nice staff','simpátic','kind'] },
-    { label: 'Fast service', kws: ['quick','fast','rápido','efficient','no wait'] },
-    { label: 'Good value', kws: ['value','precio','affordable','worth','cheap','good price'] },
-    { label: 'Skilled cuts', kws: ['skilled','talented','great cut','perfect cut','corte','good job'] },
-    { label: 'Clean space', kws: ['clean','limpio','tidy','spotless'] },
-    { label: 'Beard / shave', kws: ['beard','shave','barba','afeit'] },
-    { label: 'Colour work', kws: ['colour','color','highlights','tinte','balayage'] },
-    { label: 'Loyal regulars', kws: ['years','regular','always come','siempre','fiel'] },
-    { label: 'Good location', kws: ['location','ubicación','central','well located','cerca'] },
-    { label: 'Appointment easy', kws: ['appointment','cita','easy to book','no queue'] },
-    { label: 'Kids welcome', kws: ['kids','children','niños','family','familia'] },
-  ];
-  return candidates.filter(c => c.kws.some(k => rt.includes(k))).map(c => c.label);
-}
-
-function recentReviewPct(place) {
-  const now = Date.now();
-  const oneYearMs = 365 * 24 * 3600 * 1000;
-  const reviews = place.reviews || [];
-  if (!reviews.length) return null;
-  const recent = reviews.filter(r => {
-    if (r.publishTime instanceof Date) return (now - r.publishTime.getTime()) < oneYearMs;
-    const d = r.relativePublishTimeDescription || '';
-    return /day|week|month|a year/.test(d);
-  });
-  return Math.round(recent.length / reviews.length * 100);
-}
-
-// ─────────────────────────────────────────────────────────────────────
-//  NORMALISE
-// ─────────────────────────────────────────────────────────────────────
-function normalise(p) {
+// Normalise New Places API field names to neutral keys used by scoring
+function normalisedPlace(p) {
   return {
     id:          p.id,
     name:        p.displayName,
@@ -517,134 +418,144 @@ function normalise(p) {
     rating:      p.rating,
     reviewCount: p.userRatingCount,
     website:     p.websiteURI,
-    phone:       p.nationalPhoneNumber,
     reviews:     p.reviews || [],
     types:       p.types || [],
-    openingHours:p.regularOpeningHours,
-    photos:      p.photos || [],
-    priceLevel:  p.priceLevel,
   };
 }
-function normaliseNearby(places, myId) {
-  return places
-    .filter(p => p.id !== myId)
-    .map(p => ({ id: p.id, name: p.displayName, types: p.types || [], rating: p.rating, reviewCount: p.userRatingCount }));
+
+function normalisedNearby(places) {
+  return places.map(p => ({ id: p.id, types: p.types || [] }));
 }
 
-// ─────────────────────────────────────────────────────────────────────
-//  SCORING
-// ─────────────────────────────────────────────────────────────────────
+// ── SCORING ───────────────────────────────────────────────────────────
+
 function scoreSuccession(place, manual) {
-  let score = 0, max = 8; const factors = [];
+  let score = 0, max = 8;
+  const factors = [];
+
   const age = parseInt(manual.ownerAge);
   if (!isNaN(age)) {
-    if (age >= 60)      { score += 3; factors.push(`Owner est. age ${age} — approaching retirement`); }
+    if (age >= 60)      { score += 3; factors.push(`Owner est. age ${age} — likely approaching retirement`); }
     else if (age >= 50) { score += 2; factors.push(`Owner est. age ${age} — mid-to-late career`); }
     else if (age >= 40) { score += 1; factors.push(`Owner est. age ${age} — mid-career`); }
     else                {             factors.push(`Owner est. age ${age} — relatively young`); }
   } else {
-    factors.push('Owner age not provided — add manually for higher accuracy');
+    factors.push('Owner age not provided');
   }
+
   const years = parseInt(manual.yearsOp);
   if (!isNaN(years)) {
-    if (years >= 20)      { score += 3; factors.push(`${years} yrs in operation — long-established legacy business`); }
-    else if (years >= 10) { score += 2; factors.push(`${years} yrs in operation`); }
-    else if (years >= 5)  { score += 1; factors.push(`${years} yrs in operation`); }
-    else                  {             factors.push(`Only ${years} yr(s) in operation`); }
+    if (years >= 20)      { score += 3; factors.push(`${years} years in operation — long-established legacy business`); }
+    else if (years >= 10) { score += 2; factors.push(`${years} years in operation`); }
+    else if (years >= 5)  { score += 1; factors.push(`${years} years in operation — relatively new`); }
+    else                  {             factors.push(`Only ${years} year(s) in operation`); }
   } else {
-    factors.push('Years in operation unknown');
+    factors.push('Years in operation not provided');
   }
-  if (!place.website) { score += 1; factors.push('No website — no digital succession investment'); }
-  else                {             factors.push('Has a website'); }
-  const rt = reviewsText(place);
-  const bkws = ['book online','online booking','treatwell','booksy','fresha','vagaro','appointy','planity'];
-  if (!bkws.some(k => rt.includes(k)) && !manual.bookingPlatform) {
-    score += 1; factors.push('No online booking platform detected');
+
+  if (!place.website) {
+    score += 1; factors.push('No website — no digital succession investment');
   } else {
-    factors.push(`Booking platform: ${manual.bookingPlatform || 'detected in reviews'}`);
+    factors.push('Has a website');
   }
+
+  const rt = rtext(place);
+  const bookingKws = ['book online','online booking','treatwell','booksy','fresha','vagaro','appointy'];
+  if (!bookingKws.some(k => rt.includes(k))) {
+    score += 1; factors.push('No online booking signals in reviews');
+  } else {
+    factors.push('Online booking platform referenced in reviews');
+  }
+
   const level = score >= 6 ? 'High' : score >= 4 ? 'Medium' : 'Low';
   return { score, max, level, factors };
 }
 
 function scoreLoyalty(place) {
-  let score = 0, max = 9; const factors = [];
+  let score = 0, max = 9;
+  const factors = [];
   const rating = place.rating || 0;
   const rcount = place.reviewCount || 0;
+
   if (rating >= 4.5)      { score += 3; factors.push(`Excellent rating: ${rating}/5`); }
   else if (rating >= 4.0) { score += 2; factors.push(`Good rating: ${rating}/5`); }
   else if (rating >= 3.5) { score += 1; factors.push(`Average rating: ${rating}/5`); }
-  else if (rating > 0)    {             factors.push(`Below average: ${rating}/5`); }
+  else if (rating > 0)    {             factors.push(`Below average rating: ${rating}/5`); }
   else                    {             factors.push('No rating data'); }
-  if (rcount >= 200)      { score += 3; factors.push(`High volume: ${rcount.toLocaleString()} reviews`); }
-  else if (rcount >= 80)  { score += 2; factors.push(`Moderate volume: ${rcount} reviews`); }
-  else if (rcount >= 20)  { score += 1; factors.push(`Limited volume: ${rcount} reviews`); }
-  else                    {             factors.push(`Very few reviews: ${rcount}`); }
-  const rt = reviewsText(place);
-  const lkws = ['years','always come','always go','regular','every week','every month','been coming','long time','loyal','best in','never going anywhere','since i','for years','fiel','siempre'];
-  const hits = lkws.filter(k => rt.includes(k));
-  if (hits.length >= 3)      { score += 3; factors.push('Strong repeat-customer language in reviews'); }
-  else if (hits.length >= 1) { score += 1; factors.push('Some repeat-customer signals in reviews'); }
-  else                       {             factors.push('No strong loyalty signals in sample reviews'); }
+
+  if (rcount >= 200)     { score += 3; factors.push(`High review volume: ${rcount.toLocaleString()} reviews`); }
+  else if (rcount >= 80) { score += 2; factors.push(`Moderate review volume: ${rcount} reviews`); }
+  else if (rcount >= 20) { score += 1; factors.push(`Limited review volume: ${rcount} reviews`); }
+  else                   {             factors.push(`Very few reviews: ${rcount}`); }
+
+  const rt = rtext(place);
+  const loyKws = ['years','always come','always go','regular','every week','every month',
+    'been coming','long time','loyal','best in','never going anywhere','since i','for years'];
+  const hits = loyKws.filter(k => rt.includes(k));
+  if (hits.length >= 3)     { score += 3; factors.push('Strong repeat-customer language in reviews'); }
+  else if (hits.length >= 1){ score += 1; factors.push('Some repeat-customer signals in reviews'); }
+  else                      {             factors.push('No strong loyalty signals in available reviews'); }
+
   const level = score >= 7 ? 'High' : score >= 4 ? 'Medium' : 'Low';
   return { score, max, level, factors };
 }
 
-function scoreDigitalGap(place, manual) {
-  let score = 0, max = 6; const factors = [];
-  if (!place.website) { score += 2; factors.push('No website — significant digital gap'); }
-  else                {             factors.push('Has a website'); }
-  if (!manual.bookingPlatform) { score += 2; factors.push('No online booking platform'); }
-  else { factors.push(`Booking: ${manual.bookingPlatform} (reduces gap)`); }
-  if ((place.reviewCount || 0) < 40) { score += 1; factors.push('Low review count — limited digital visibility'); }
-  if (!place.phone) { score += 1; factors.push('No phone number listed online'); }
-  else              {             factors.push('Phone number present'); }
+function scoreDigitalGap(place) {
+  let score = 0, max = 5;
+  const factors = [];
+
+  if (!place.website) {
+    score += 2; factors.push('No website — significant digital gap');
+  } else {
+    factors.push('Has website');
+  }
+
+  const rt = rtext(place);
+  const bkws = ['book online','online booking','treatwell','booksy','fresha','vagaro'];
+  if (!bkws.some(k => rt.includes(k))) {
+    score += 2; factors.push('No online booking platform detected');
+  } else {
+    factors.push('Online booking platform mentioned in reviews');
+  }
+
+  if ((place.reviewCount || 0) < 40) {
+    score += 1; factors.push('Low review count — limited digital visibility');
+  }
+
   const level = score >= 4 ? 'High' : score >= 2 ? 'Medium' : 'Low';
   return { score, max, level, factors };
 }
 
 function scoreLocation(place, nearby) {
-  let score = 0, max = 5; const factors = [];
-  const compTypes = new Set(['cafe','restaurant','food','bakery','pharmacy','drugstore','gym','fitness_center','supermarket','grocery_or_supermarket','clothing_store','shoe_store','shopping_mall','bank','convenience_store']);
-  const salonTypes = new Set(['hair_care','beauty_salon','barber']);
-  const comps   = nearby.filter(p => p.types.some(t => compTypes.has(t)));
-  const rivals  = nearby.filter(p => p.types.some(t => salonTypes.has(t)));
-  if (comps.length >= 12)     { score += 3; factors.push(`Very high foot traffic: ${comps.length} businesses within 400m`); }
-  else if (comps.length >= 6) { score += 2; factors.push(`Good foot traffic: ${comps.length} businesses nearby`); }
-  else if (comps.length >= 2) { score += 1; factors.push(`${comps.length} complementary businesses nearby`); }
-  else                        {             factors.push('Sparse surrounding commerce'); }
-  if (rivals.length <= 2)     { score += 2; factors.push(`Low competition: ${rivals.length} rival salon(s) within 400m`); }
-  else if (rivals.length <= 4){ score += 1; factors.push(`Moderate competition: ${rivals.length} salons nearby`); }
-  else                        {             factors.push(`High competition: ${rivals.length} salons within 400m`); }
-  const level = score >= 4 ? 'High' : score >= 2 ? 'Medium' : 'Low';
-  return { score, max, level, factors, rivals };
-}
+  let score = 0, max = 5;
+  const factors = [];
+  const myId = place.id;
 
-function scoreVitality(place) {
-  let score = 0, max = 6; const factors = [];
-  // Opening days
-  const days = place.openingHours?.weekdayDescriptions?.length || 0;
-  if (days >= 6)      { score += 2; factors.push(`Open ${days} days/week — strong operating commitment`); }
-  else if (days >= 5) { score += 1; factors.push(`Open ${days} days/week`); }
-  else if (days > 0)  {             factors.push(`Open ${days} days/week — limited hours`); }
-  else                {             factors.push('Opening hours not available'); }
-  // Photo presence
-  if (place.photos.length >= 10) { score += 2; factors.push(`${place.photos.length} photos on Google — actively managed profile`); }
-  else if (place.photos.length >= 3) { score += 1; factors.push(`${place.photos.length} photos on Google`); }
-  else                               {             factors.push('Few or no photos — low profile activity'); }
-  // Recent review activity
-  const pct = recentReviewPct(place);
-  if (pct !== null) {
-    if (pct >= 60)      { score += 2; factors.push(`${pct}% of reviews are recent — active client flow`); }
-    else if (pct >= 30) { score += 1; factors.push(`${pct}% of reviews are recent`); }
-    else                {             factors.push(`Only ${pct}% of reviews are recent — possible decline`); }
-  }
-  const level = score >= 5 ? 'High' : score >= 3 ? 'Medium' : 'Low';
+  const compTypes = new Set(['cafe','restaurant','food','bakery','pharmacy','drugstore',
+    'gym','fitness_center','supermarket','grocery_or_supermarket','clothing_store',
+    'shoe_store','shopping_mall','bank','convenience_store']);
+  const salonTypes = new Set(['hair_care','beauty_salon','barber']);
+
+  const comps  = nearby.filter(p => p.id !== myId && p.types.some(t => compTypes.has(t)));
+  const rivals = nearby.filter(p => p.id !== myId && p.types.some(t => salonTypes.has(t)));
+
+  if (comps.length >= 12)    { score += 3; factors.push(`Very high foot traffic: ${comps.length} complementary businesses within 400m`); }
+  else if (comps.length >= 6){ score += 2; factors.push(`Good foot traffic: ${comps.length} complementary businesses nearby`); }
+  else if (comps.length >= 2){ score += 1; factors.push(`${comps.length} complementary businesses in the vicinity`); }
+  else                       {             factors.push('Sparse surrounding commerce'); }
+
+  if (rivals.length <= 2)      { score += 2; factors.push(`Low competition: ${rivals.length} other salon(s) within 400m`); }
+  else if (rivals.length <= 4) { score += 1; factors.push(`Moderate competition: ${rivals.length} salons nearby`); }
+  else                         {             factors.push(`High competition: ${rivals.length} salons within 400m`); }
+
+  const level = score >= 4 ? 'High' : score >= 2 ? 'Medium' : 'Low';
   return { score, max, level, factors };
 }
 
 function scoreFlags(place) {
   const defs = [
+    { kw: 'wait',           label: 'Long wait times mentioned' },
+    { kw: 'waiting time',   label: 'Long wait times mentioned' },
     { kw: 'rude',           label: 'Staff rudeness complaints' },
     { kw: 'dirty',          label: 'Cleanliness concerns' },
     { kw: 'overpriced',     label: 'Overpricing complaints' },
@@ -655,242 +566,132 @@ function scoreFlags(place) {
     { kw: 'unprofessional', label: 'Professionalism concerns' },
     { kw: 'worst',          label: 'Strongly negative sentiment' },
     { kw: 'avoid',          label: 'Customers advising others to avoid' },
-    { kw: 'waiting time',   label: 'Long wait times mentioned' },
   ];
-  const rt = reviewsText(place);
+  const rt = rtext(place);
   const seen = new Set();
-  const flags = defs.filter(({kw,label}) => rt.includes(kw) && !seen.has(label) && seen.add(label));
+  const flags = defs.filter(({ kw, label }) => rt.includes(kw) && !seen.has(label) && seen.add(label));
   const level = flags.length >= 3 ? 'High' : flags.length >= 1 ? 'Medium' : 'Low';
   return { count: flags.length, level, flags: flags.map(f => f.label) };
 }
 
-function buildRecommendation(suc, loy, dig, loc, vit, ops, manual) {
-  const goodSuc  = suc.level !== 'Low';
-  const goodLoy  = loy.level !== 'Low';
-  const hasGap   = dig.level !== 'Low';
-  const goodLoc  = loc.level !== 'Low';
-  const goodVit  = vit.level !== 'Low';
-  const cleanOps = ops.level !== 'High';
-  const willingYes = manual.willingness === 'yes' || manual.willingness === 'open';
+function buildRecommendation(suc, loy, dig, loc, ops) {
+  const goodSuc = suc.level !== 'Low';
+  const goodLoy = loy.level !== 'Low';
+  const hasGap  = dig.level !== 'Low';
+  const goodLoc = loc.level !== 'Low';
+  const cleanOps= ops.level !== 'High';
 
-  if (!cleanOps) return { label:'Pass', reason:'Multiple operational red flags suggest significant service or management issues that would be difficult to inherit.', bg:'#fee2e2', border:'#fca5a5', color:'#991b1b' };
-  if (!goodLoy)  return { label:'Pass', reason:'Weak customer loyalty signals indicate limited inheritable value in the existing client base.', bg:'#fee2e2', border:'#fca5a5', color:'#991b1b' };
-
-  if (goodSuc && goodLoy && cleanOps && (hasGap || goodLoc)) {
+  if (goodSuc && goodLoy && cleanOps) {
     let reason;
-    if (willingYes)
-      reason = 'Owner has signalled willingness to sell. Strong succession risk and loyal client base — prioritise an approach.';
-    else if (suc.level === 'High' && loy.level === 'High')
-      reason = 'High succession risk, loyal customer base, and clear digital upside make this a high-priority acquisition target.';
+    if (suc.level === 'High' && loy.level === 'High')
+      reason = 'Strong owner succession risk combined with a loyal customer base and clear digital upside makes this a high-priority acquisition target.';
     else if (suc.level === 'High')
-      reason = 'High owner succession risk and adequate customer loyalty signal an owner ready for an exit.';
+      reason = 'High succession risk and adequate customer loyalty signal an owner ready for an exit — approach soon.';
+    else if (hasGap)
+      reason = 'Solid fundamentals with a meaningful digital gap that centralised operations can close quickly.';
     else
-      reason = 'Solid fit across succession risk, loyalty, and upside potential.';
-    return { label:'Pursue', reason, bg:'#dcfce7', border:'#86efac', color:'#15803d' };
+      reason = 'Good fit across succession risk, customer loyalty, and operational profile.';
+    return { label: 'Pursue', reason, bg: '#dcfce7', border: '#86efac', color: '#15803d' };
+  }
+
+  if (!goodLoy || ops.level === 'High') {
+    let reason;
+    if (ops.level === 'High')
+      reason = 'Multiple operational red flags suggest significant management or service quality issues that would be difficult to inherit.';
+    else
+      reason = 'Weak customer loyalty signals indicate limited inheritable value in the existing customer base.';
+    return { label: 'Pass', reason, bg: '#fee2e2', border: '#fca5a5', color: '#991b1b' };
   }
 
   let reason;
   if (!goodSuc)
-    reason = 'Low succession urgency — owner appears early career. Revisit in 2–3 years.';
-  else if (!goodVit)
-    reason = 'Business vitality signals are weak — monitor for further decline or ownership change.';
+    reason = 'Owner succession urgency appears low — revisit in 2–3 years as the owner approaches retirement age.';
+  else if (!hasGap)
+    reason = 'Good fundamentals but limited digital upside; monitor and track for changes in ownership signals.';
   else
-    reason = 'Mixed signals across categories. A site visit and direct owner conversation would clarify fit.';
-  return { label:'Monitor', reason, bg:'#fef9c3', border:'#fde68a', color:'#92400e' };
+    reason = 'Mixed signals — a site visit and owner conversation would clarify fit before committing.';
+  return { label: 'Monitor', reason, bg: '#fef9c3', border: '#fde68a', color: '#92400e' };
 }
 
-// ─────────────────────────────────────────────────────────────────────
-//  RENDER
-// ─────────────────────────────────────────────────────────────────────
-function badgeCls(cat, level) {
+// ── RENDER ───────────────────────────────────────────────────────────
+
+function badgeCls(category, level) {
   const map = {
-    risk:     {High:'badge-red',    Medium:'badge-yellow', Low:'badge-green'},
-    loyalty:  {High:'badge-green',  Medium:'badge-yellow', Low:'badge-red'},
-    gap:      {High:'badge-green',  Medium:'badge-yellow', Low:'badge-gray'},
-    location: {High:'badge-green',  Medium:'badge-yellow', Low:'badge-red'},
-    vitality: {High:'badge-green',  Medium:'badge-yellow', Low:'badge-red'},
-    flags:    {High:'badge-red',    Medium:'badge-yellow', Low:'badge-green'},
+    risk:     { High: 'badge-red',    Medium: 'badge-yellow', Low: 'badge-green' },
+    loyalty:  { High: 'badge-green',  Medium: 'badge-yellow', Low: 'badge-red'   },
+    gap:      { High: 'badge-green',  Medium: 'badge-yellow', Low: 'badge-gray'  },
+    location: { High: 'badge-green',  Medium: 'badge-yellow', Low: 'badge-red'   },
+    flags:    { High: 'badge-red',    Medium: 'badge-yellow', Low: 'badge-green' },
   };
-  return map[cat]?.[level] ?? 'badge-gray';
+  return map[category]?.[level] ?? 'badge-gray';
 }
-function barColor(cat, level) {
-  const c = {
-    risk:     {High:'#16a34a', Medium:'#ca8a04', Low:'#dc2626'},
-    loyalty:  {High:'#16a34a', Medium:'#ca8a04', Low:'#6b7280'},
-    gap:      {High:'#16a34a', Medium:'#ca8a04', Low:'#6b7280'},
-    location: {High:'#16a34a', Medium:'#ca8a04', Low:'#6b7280'},
-    vitality: {High:'#16a34a', Medium:'#ca8a04', Low:'#dc2626'},
-    flags:    {High:'#dc2626', Medium:'#ca8a04', Low:'#16a34a'},
+
+function barFill(category, level) {
+  const colours = {
+    risk:     { High: '#16a34a', Medium: '#ca8a04', Low: '#dc2626' },
+    loyalty:  { High: '#16a34a', Medium: '#ca8a04', Low: '#6b7280' },
+    gap:      { High: '#16a34a', Medium: '#ca8a04', Low: '#6b7280' },
+    location: { High: '#16a34a', Medium: '#ca8a04', Low: '#6b7280' },
+    flags:    { High: '#dc2626', Medium: '#ca8a04', Low: '#16a34a' },
   };
-  return c[cat]?.[level] ?? '#6b7280';
+  return colours[category]?.[level] ?? '#6b7280';
 }
 
-function catCardHtml(title, score, max, level, factors, cat, badgeTxt) {
-  const pct = max ? Math.round(score/max*100) : 0;
-  const color = barColor(cat, level);
-  return `<div class="cat-card">
-    <div class="cat-head">
-      <div class="cat-title">${esc(title)}</div>
-      <div class="badge ${badgeCls(cat,level)}">${esc(badgeTxt)}</div>
-    </div>
-    <div class="score-bar"><div class="score-fill" style="width:${pct}%;background:${color}"></div></div>
-    <ul class="factors">${(factors||[]).map(f=>`<li>${esc(f)}</li>`).join('')}</ul>
-  </div>`;
+function catCard(title, score, max, level, factors, category, badgeText, full) {
+  const pct = max ? Math.round(score / max * 100) : 0;
+  const color = barFill(category, level);
+  const bc = badgeCls(category, level);
+  return `
+    <div class="cat-card${full ? ' full' : ''}">
+      <div class="cat-head">
+        <div class="cat-title">${esc(title)}</div>
+        <div class="badge ${bc}">${esc(badgeText)}</div>
+      </div>
+      <div class="score-bar"><div class="score-fill" style="width:${pct}%;background:${color}"></div></div>
+      <ul class="factors">${(factors||[]).map(f=>`<li>${esc(f)}</li>`).join('')}</ul>
+    </div>`;
 }
-
-// ── Radar chart (SVG pentagon) ──────────────────────────────────────
-function drawRadar(scores) {
-  // scores: array of {label, pct, color} in order [suc, loy, dig, loc, vit]
-  const cx = 130, cy = 130, R = 100;
-  const n = scores.length;
-  const angleOffset = -Math.PI / 2;
-
-  function pt(i, r) {
-    const a = angleOffset + (2 * Math.PI * i) / n;
-    return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
-  }
-
-  let svg = '';
-
-  // Grid rings at 25%, 50%, 75%, 100%
-  for (const frac of [0.25, 0.5, 0.75, 1.0]) {
-    const pts = scores.map((_,i) => pt(i, R * frac).join(',')).join(' ');
-    svg += `<polygon points="${pts}" fill="none" stroke="#e5e7eb" stroke-width="${frac===1?1.5:.8}"/>`;
-  }
-  // Spokes
-  for (let i = 0; i < n; i++) {
-    const [x,y] = pt(i, R);
-    svg += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#e5e7eb" stroke-width=".8"/>`;
-  }
-  // Data polygon
-  const dataPts = scores.map((s,i) => pt(i, R * s.pct / 100).join(',')).join(' ');
-  svg += `<polygon points="${dataPts}" fill="rgba(37,99,235,0.12)" stroke="#2563eb" stroke-width="2"/>`;
-  // Data dots
-  for (let i = 0; i < n; i++) {
-    const [x,y] = pt(i, R * scores[i].pct / 100);
-    svg += `<circle cx="${x}" cy="${y}" r="4" fill="${scores[i].color}" stroke="#fff" stroke-width="1.5"/>`;
-  }
-  // Labels
-  for (let i = 0; i < n; i++) {
-    const [x,y] = pt(i, R + 20);
-    const anchor = x < cx - 5 ? 'end' : x > cx + 5 ? 'start' : 'middle';
-    svg += `<text x="${x}" y="${y}" text-anchor="${anchor}" font-size="9.5" fill="#666" font-family="-apple-system,sans-serif">${esc(scores[i].label)}</text>`;
-  }
-  document.getElementById('radarSvg').innerHTML = svg;
-
-  // Legend
-  const legend = document.getElementById('radarLegend');
-  legend.innerHTML = scores.map(s => `
-    <div style="display:flex;align-items:center;gap:7px">
-      <div style="width:10px;height:10px;border-radius:50%;background:${s.color};flex-shrink:0"></div>
-      <span style="font-size:11px;color:#555">${esc(s.label)}: <strong>${s.pct}%</strong></span>
-    </div>`).join('');
-}
-
-// ─────────────────────────────────────────────────────────────────────
-//  FULL RENDER
-// ─────────────────────────────────────────────────────────────────────
-let _place = null, _nearby = null;
 
 function renderReport(place, nearby, manual) {
-  const suc  = scoreSuccession(place, manual);
-  const loy  = scoreLoyalty(place);
-  const dig  = scoreDigitalGap(place, manual);
-  const loc  = scoreLocation(place, nearby);
-  const vit  = scoreVitality(place);
-  const ops  = scoreFlags(place);
-  const rec  = buildRecommendation(suc, loy, dig, loc, vit, ops, manual);
-  const themes = autoDetectThemes(place);
+  const suc = scoreSuccession(place, manual);
+  const loy = scoreLoyalty(place);
+  const dig = scoreDigitalGap(place);
+  const loc = scoreLocation(place, nearby);
+  const ops = scoreFlags(place);
+  const rec = buildRecommendation(suc, loy, dig, loc, ops);
 
-  // Header
+  // place here is the normalised object
   document.getElementById('rName').textContent = place.name || '';
   document.getElementById('rAddr').textContent = place.address || '';
-  const links = [];
-  if (place.website) links.push(`<a href="${esc(place.website)}" target="_blank">Website ↗</a>`);
-  if (place.phone)   links.push(`<a href="tel:${esc(place.phone)}">${esc(place.phone)}</a>`);
-  document.getElementById('rLinks').innerHTML = links.join('');
-
   const rat = place.rating;
   if (rat) {
     document.getElementById('rStars').textContent  = starsHtml(rat);
     document.getElementById('rRating').textContent = rat.toFixed(1);
-    document.getElementById('rCount').textContent  = `${(place.reviewCount||0).toLocaleString()} reviews`;
+    document.getElementById('rCount').textContent  = `${(place.reviewCount || 0).toLocaleString()} reviews`;
   }
 
-  // Recommendation
   const banner = document.getElementById('recBanner');
-  banner.style.cssText = `background:${rec.bg};border:1px solid ${rec.border};border-radius:7px;padding:16px 20px;display:flex;align-items:flex-start;gap:18px`;
+  banner.style.cssText = `background:${rec.bg};border:1px solid ${rec.border};border-radius:6px;padding:16px 20px;display:flex;align-items:flex-start;gap:18px;`;
   document.getElementById('recVerdict').style.color = rec.color;
   document.getElementById('recVerdict').textContent = rec.label;
   document.getElementById('recReason').style.color  = rec.color;
   document.getElementById('recReason').textContent  = rec.reason;
 
-  // Stats row
-  document.getElementById('sRating').textContent  = rat ? rat.toFixed(1) : '—';
-  document.getElementById('sReviews').textContent = (place.reviewCount||0).toLocaleString() || '—';
-  const yearsVal = parseInt(manual.yearsOp);
-  document.getElementById('sYears').textContent   = !isNaN(yearsVal) ? yearsVal : '—';
-  document.getElementById('sYearsNote').textContent = manual.yearsAutoDetected && !isNaN(yearsVal) ? 'auto-detected' : '';
-  const staffVal = parseInt(manual.staffCount);
-  document.getElementById('sStaff').textContent   = !isNaN(staffVal) ? staffVal : '—';
-  document.getElementById('sStaffNote').textContent = manual.staffAutoDetected && !isNaN(staffVal) ? 'auto-detected' : '';
-  const digitalPct = Math.round((dig.max - dig.score) / dig.max * 100);
-  document.getElementById('sDigital').textContent = digitalPct + '%';
+  const grid = document.getElementById('catGrid');
+  grid.innerHTML =
+    catCard('1 · Succession Risk',       suc.score, suc.max, suc.level, suc.factors, 'risk',     suc.level + ' Risk') +
+    catCard('2 · Customer Loyalty',      loy.score, loy.max, loy.level, loy.factors, 'loyalty',  loy.level + ' Loyalty') +
+    catCard('3 · Digital Maturity Gap',  dig.score, dig.max, dig.level, dig.factors, 'gap',      dig.level + ' Opportunity') +
+    catCard('4 · Location Strength',     loc.score, loc.max, loc.level, loc.factors, 'location', loc.level + ' Location') +
+    catCard('5 · Operational Red Flags',
+      ops.count, 4, ops.level,
+      ops.flags.length ? ops.flags : ['No significant negative patterns detected in available reviews'],
+      'flags',
+      ops.level === 'Low' ? 'None Detected' : ops.level === 'Medium' ? 'Minor Flags' : 'Major Flags',
+      true
+    );
 
-  // Radar chart
-  const radarScores = [
-    { label: 'Succession', pct: Math.round(suc.score/suc.max*100), color: barColor('risk',  suc.level) },
-    { label: 'Loyalty',    pct: Math.round(loy.score/loy.max*100), color: barColor('loyalty',loy.level) },
-    { label: 'Dig. Gap',   pct: Math.round(dig.score/dig.max*100), color: barColor('gap',   dig.level) },
-    { label: 'Location',   pct: Math.round(loc.score/loc.max*100), color: barColor('location',loc.level) },
-    { label: 'Vitality',   pct: Math.round(vit.score/vit.max*100), color: barColor('vitality',vit.level) },
-  ];
-  drawRadar(radarScores);
-
-  // Category cards
-  const catsCol = document.getElementById('catsCol');
-  catsCol.innerHTML =
-    catCardHtml('1 · Succession Risk',     suc.score, suc.max, suc.level, suc.factors, 'risk',     suc.level+' Risk') +
-    catCardHtml('2 · Customer Loyalty',    loy.score, loy.max, loy.level, loy.factors, 'loyalty',  loy.level+' Loyalty') +
-    catCardHtml('3 · Digital Maturity Gap',dig.score, dig.max, dig.level, dig.factors, 'gap',      dig.level+' Opportunity') +
-    catCardHtml('4 · Location Strength',   loc.score, loc.max, loc.level, loc.factors, 'location', loc.level+' Location') +
-    catCardHtml('5 · Business Vitality',   vit.score, vit.max, vit.level, vit.factors, 'vitality', vit.level+' Vitality');
-
-  // Rivals table
-  const salonTypes = new Set(['hair_care','beauty_salon','barber']);
-  const rivals = nearby.filter(p => p.types.some(t => salonTypes.has(t))).slice(0,6);
-  if (rivals.length) {
-    document.getElementById('rivalsTable').innerHTML =
-      `<thead><tr><th>Salon</th><th>Rating</th><th>Reviews</th><th>vs Target</th></tr></thead>
-       <tbody>${rivals.map(r => {
-         const diff = r.rating && rat ? (r.rating - rat).toFixed(1) : null;
-         const diffTxt = diff ? (diff > 0 ? `+${diff}` : diff) : '—';
-         const diffColor = diff > 0 ? '#dc2626' : diff < 0 ? '#16a34a' : '#888';
-         return `<tr>
-           <td>${esc(r.name||'Unknown')}</td>
-           <td><span class="rival-stars">${'★'.repeat(Math.round(r.rating||0))}</span> ${r.rating?.toFixed(1)||'—'}</td>
-           <td>${(r.reviewCount||0).toLocaleString()}</td>
-           <td style="color:${diffColor};font-weight:700">${diffTxt}</td>
-         </tr>`;
-       }).join('')}</tbody>`;
-  } else {
-    document.getElementById('rivalsPanel').querySelector('table').innerHTML = '<tbody><tr><td style="font-size:12px;color:#aaa;padding:8px 0">No competing salons found within 400m</td></tr></tbody>';
-  }
-
-  // Themes + Flags
-  document.getElementById('themesList').innerHTML = themes.length
-    ? themes.map(t => `<span class="theme-tag">${esc(t)}</span>`).join('')
-    : '<span style="font-size:12px;color:#aaa">Not enough review data</span>';
-
-  const flagsBlock = document.getElementById('flagsBlock');
-  if (ops.flags.length) {
-    flagsBlock.innerHTML = `<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#888;margin-bottom:8px">Operational Watch-outs</div>
-      <div class="flags-list">${ops.flags.map(f=>`<div class="flag-item">⚠ ${esc(f)}</div>`).join('')}</div>`;
-  } else {
-    flagsBlock.innerHTML = `<div class="no-flags">✓ No operational red flags detected in available reviews</div>`;
-  }
-
-  // Reviews
+  // Reviews: new Places API uses review.text.text and review.authorAttribution.displayName
   const reviews = place.reviews || [];
   if (reviews.length) {
     document.getElementById('reviewsList').innerHTML = reviews.map(r => {
@@ -898,160 +699,84 @@ function renderReport(place, nearby, manual) {
       const author = r.authorAttribution?.displayName || r.author_name || '';
       const time   = r.relativePublishTimeDescription || r.relative_time_description || '';
       const stars  = r.rating || 0;
-      return `<div class="review">
-        <div class="review-text"><span class="rev-stars">${'★'.repeat(stars)}${'☆'.repeat(5-stars)}</span>${esc(text)}</div>
-        <div class="review-meta">${esc(author)} · ${esc(time)}</div>
-      </div>`;
+      return `
+        <div class="review">
+          <div class="review-text">
+            <span class="r-stars">${'★'.repeat(stars)}${'☆'.repeat(5 - stars)}</span>${esc(text)}
+          </div>
+          <div class="review-meta">${esc(author)} · ${esc(time)}</div>
+        </div>`;
     }).join('');
     document.getElementById('reviewsPanel').style.display = 'block';
   }
 
-  document.getElementById('genDate').textContent = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('genDate').textContent = new Date().toLocaleDateString('en-GB',
+    { day: 'numeric', month: 'long', year: 'numeric' });
+
   document.getElementById('report').style.display = 'block';
-  document.getElementById('report').scrollIntoView({ behavior:'smooth' });
-
-  // Save to history
-  saveHistory({
-    name: place.name,
-    address: place.address,
-    rating: place.rating,
-    recommendation: rec.label,
-    color: rec.color,
-    date: new Date().toLocaleDateString('en-GB'),
-  });
+  document.getElementById('report').scrollIntoView({ behavior: 'smooth' });
 }
 
-// ─────────────────────────────────────────────────────────────────────
-//  HISTORY (localStorage)
-// ─────────────────────────────────────────────────────────────────────
-function saveHistory(entry) {
-  const hist = getHistory();
-  hist.unshift(entry);
-  localStorage.setItem('salon_history', JSON.stringify(hist.slice(0, 10)));
-}
-function getHistory() {
-  try { return JSON.parse(localStorage.getItem('salon_history') || '[]'); } catch(_) { return []; }
-}
-function openHistory() {
-  const hist = getHistory();
-  const list = document.getElementById('historyList');
-  list.innerHTML = hist.length ? hist.map(h => `
-    <div class="history-item">
-      <div class="history-name">${esc(h.name||'Unknown')}</div>
-      <div class="history-meta">${esc(h.address||'')} · ${esc(h.date||'')}</div>
-      <div class="history-rec" style="color:${esc(h.color)}">${esc(h.recommendation)}</div>
-    </div>`).join('')
-    : '<div class="history-empty">No analyses yet</div>';
-  document.getElementById('historyDrawer').style.display = 'block';
-  document.getElementById('overlay').style.display = 'block';
-}
-function closeHistory() {
-  document.getElementById('historyDrawer').style.display = 'none';
-  document.getElementById('overlay').style.display = 'none';
-}
+// ── MAIN FLOW ─────────────────────────────────────────────────────────
 
-// ─────────────────────────────────────────────────────────────────────
-//  MAIN FLOW
-// ─────────────────────────────────────────────────────────────────────
-async function fetchData() {
-  const input  = document.getElementById('salonInput').value.trim();
-  const apiKey = document.getElementById('apiKey').value.trim();
+async function startAnalysis() {
+  const input    = document.getElementById('salonInput').value.trim();
+  const apiKey   = document.getElementById('apiKey').value.trim();
+  const manual   = {
+    ownerAge:    document.getElementById('ownerAge').value,
+    yearsOp:     document.getElementById('yearsOp').value,
+    staffCount:  document.getElementById('staffCount').value,
+    willingness: document.getElementById('willingness').value,
+    notes:       document.getElementById('notes').value,
+  };
+
+  hide('errBox'); hide('report');
+  document.getElementById('reviewsPanel').style.display = 'none';
+
   if (!input)  { showErr('Enter a salon name or Google Maps link.'); return; }
   if (!apiKey) { showErr('Enter your Google Places API key.'); return; }
 
-  hideErr(); hide('report');
-  document.getElementById('reviewsPanel').style.display = 'none';
-  document.getElementById('fetchBtn').disabled = true;
-  setLoading(true, 'Fetching salon data from Google Places…');
+  document.getElementById('analyzeBtn').disabled = true;
+  show('loading');
 
   try {
     await loadMapsApi(apiKey);
 
+    // Extract plain-text query from Maps URLs
     let searchQuery = input;
     if (input.includes('maps.google') || input.includes('google.com/maps')) {
       searchQuery = nameFromUrl(input) || input;
     }
 
-    const raw     = await searchPlace(searchQuery);
-    const place   = normalise(raw);
-    const rawNear = await searchNearby(raw.location);
-    const nearby  = normaliseNearby(rawNear, raw.id);
+    const rawPlace  = await searchPlace(searchQuery);
+    const place     = normalisedPlace(rawPlace);
+    const rawNearby = await searchNearby(rawPlace.location);
+    const nearby    = normalisedNearby(rawNearby);
 
-    _place  = place;
-    _nearby = nearby;
-
-    // Auto-detect and pre-fill step 2 fields
-    const estYears = autoDetectYears(place);
-    const estStaff = autoDetectStaff(place);
-    const booking  = autoDetectBooking(place);
-
-    const yearsInput = document.getElementById('yearsOp');
-    const staffInput = document.getElementById('staffCount');
-    const bookInput  = document.getElementById('bookingPlatform');
-
-    if (estYears) {
-      yearsInput.value = estYears;
-      yearsInput.classList.add('auto-filled');
-      yearsInput.title = 'Auto-detected from review timestamps and text';
-    }
-    if (estStaff) {
-      staffInput.value = estStaff;
-      staffInput.classList.add('auto-filled');
-      staffInput.title = 'Auto-detected from stylist name mentions in reviews';
-    }
-    bookInput.value = booking || 'None detected';
-
-    setLoading(false);
-    document.getElementById('step2').style.display = 'block';
-    document.getElementById('step2').scrollIntoView({ behavior:'smooth' });
-
+    hide('loading');
+    renderReport(place, nearby, manual);
   } catch(e) {
-    setLoading(false);
+    hide('loading');
     showErr(e.message);
   } finally {
-    document.getElementById('fetchBtn').disabled = false;
+    document.getElementById('analyzeBtn').disabled = false;
   }
 }
 
-function runAnalysis() {
-  if (!_place) { showErr('Please fetch salon data first.'); return; }
-  const manual = {
-    ownerAge:          document.getElementById('ownerAge').value,
-    yearsOp:           document.getElementById('yearsOp').value,
-    staffCount:        document.getElementById('staffCount').value,
-    willingness:       document.getElementById('willingness').value,
-    bookingPlatform:   document.getElementById('bookingPlatform').value !== 'None detected' ? document.getElementById('bookingPlatform').value : '',
-    notes:             document.getElementById('notes').value,
-    yearsAutoDetected: document.getElementById('yearsOp').classList.contains('auto-filled'),
-    staffAutoDetected: document.getElementById('staffCount').classList.contains('auto-filled'),
-  };
-  hideErr();
-  renderReport(_place, _nearby, manual);
+function showErr(msg) {
+  const b = document.getElementById('errBox');
+  b.textContent = msg;
+  b.style.display = 'block';
 }
-
-function resetAll() {
-  _place = null; _nearby = null;
-  hide('report'); hide('step2');
-  document.getElementById('reviewsPanel').style.display = 'none';
-  ['ownerAge','yearsOp','staffCount','notes'].forEach(id => { document.getElementById(id).value = ''; document.getElementById(id) instanceof HTMLInputElement && document.getElementById(id).classList.remove('auto-filled'); });
-  document.getElementById('willingness').value = 'unknown';
-  document.getElementById('bookingPlatform').value = '';
+function show(id) { document.getElementById(id).style.display = 'block'; }
+function hide(id) { document.getElementById(id).style.display = 'none'; }
+function resetView() {
+  hide('report');
   document.getElementById('salonInput').focus();
-  hideErr();
-}
-
-function showErr(m) { const b=document.getElementById('errBox'); b.textContent=m; b.style.display='block'; }
-function hideErr()  { document.getElementById('errBox').style.display='none'; }
-function show(id)   { document.getElementById(id).style.display='block'; }
-function hide(id)   { document.getElementById(id).style.display='none'; }
-function setLoading(on, msg) {
-  const el = document.getElementById('loading');
-  el.style.display = on ? 'block' : 'none';
-  if (msg) document.getElementById('loadingMsg').textContent = msg;
 }
 
 document.getElementById('salonInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') fetchData();
+  if (e.key === 'Enter') startAnalysis();
 });
 </script>
 </body>
