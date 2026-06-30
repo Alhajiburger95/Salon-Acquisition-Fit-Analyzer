@@ -254,6 +254,18 @@
       <textarea id="notes" placeholder="Anything observed in person — owner age, vibe, staffing, signage, condition of space…"></textarea>
     </div>
 
+    <div class="section-rule">Company Registry &amp; Financials (optional)</div>
+
+    <div class="field">
+      <label>Registry API Endpoint</label>
+      <input id="registryEndpoint" type="text" placeholder="e.g. https://api.einforma.com/v1/companies/search" />
+      <div class="field-note">A company-data provider's search endpoint (Einforma, Axesor, Informa D&amp;B…). Only covers incorporated companies (SL/SA) — most Barcelona salons are autónomos and won't have a match, which is itself a useful signal.</div>
+    </div>
+    <div class="field">
+      <label>Registry API Key</label>
+      <input id="registryKey" type="password" placeholder="Leave blank to skip this step" />
+    </div>
+
     <button class="btn-primary" id="analyzeBtn" onclick="startAnalysis()">Analyze Salon</button>
   </div>
 
@@ -282,6 +294,11 @@
     </div>
 
     <div class="cat-grid" id="catGrid"></div>
+
+    <div class="reviews-panel" id="registryPanel" style="display:none">
+      <h3>Company Registry &amp; Financials</h3>
+      <div id="registryContent"></div>
+    </div>
 
     <div class="reviews-panel" id="reviewsPanel">
       <h3>Review Samples (up to 5 most recent in English)</h3>
@@ -425,6 +442,50 @@ function normalisedPlace(p) {
 
 function normalisedNearby(places) {
   return places.map(p => ({ id: p.id, types: p.types || [] }));
+}
+
+// ── Company registry lookup (optional) ─────────────────────────────────
+// Generic — works with Einforma/Axesor/Informa D&B style "search by name"
+// endpoints. We defensively read several common field-name variants since
+// providers differ; the whole step is skipped silently on any failure.
+async function lookupRegistry(endpoint, key, companyName) {
+  if (!endpoint || !key) return null;
+  try {
+    const url = new URL(endpoint);
+    url.searchParams.set('name', companyName);
+    url.searchParams.set('q', companyName);
+    const resp = await fetch(url.toString(), {
+      headers: { 'Authorization': `Bearer ${key}`, 'Accept': 'application/json' }
+    });
+    if (!resp.ok) return { found: false, error: `Registry lookup failed (HTTP ${resp.status})` };
+    const data = await resp.json();
+    const hit = Array.isArray(data) ? data[0]
+              : Array.isArray(data?.results) ? data.results[0]
+              : Array.isArray(data?.companies) ? data.companies[0]
+              : data;
+    if (!hit || (!hit.name && !hit.razonSocial && !hit.companyName)) {
+      return { found: false };
+    }
+    return {
+      found: true,
+      legalName: hit.companyName || hit.razonSocial || hit.name || null,
+      legalForm: hit.legalForm || hit.formaJuridica || hit.legal_form || null,
+      incorporationDate: hit.incorporationDate || hit.fechaConstitucion || hit.incorporation_date || null,
+      employees: hit.employees || hit.numEmpleados || hit.employee_count || null,
+      revenueBand: hit.revenueBand || hit.facturacion || hit.revenue || hit.revenue_band || null,
+      lastFiledYear: hit.lastFiledYear || hit.ultimoEjercicio || hit.last_filed_year || null,
+      address: hit.address || hit.domicilio || null,
+    };
+  } catch (e) {
+    return { found: false, error: 'Registry lookup failed — endpoint unreachable or key rejected.' };
+  }
+}
+
+function yearsFromIncorporation(dateStr) {
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return null;
+  const years = (Date.now() - d.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+  return Math.floor(years);
 }
 
 // ── SCORING ───────────────────────────────────────────────────────────
@@ -652,7 +713,14 @@ function catCard(title, score, max, level, factors, category, badgeText, full) {
     </div>`;
 }
 
-function renderReport(place, nearby, manual) {
+function renderReport(place, nearby, manual, registry) {
+  // If the registry confirmed an incorporation date, that's a hard fact —
+  // prefer it over the manually-estimated years-in-operation.
+  if (registry?.found && registry.incorporationDate) {
+    const verifiedYears = yearsFromIncorporation(registry.incorporationDate);
+    if (verifiedYears !== null) manual = { ...manual, yearsOp: String(verifiedYears) };
+  }
+
   const suc = scoreSuccession(place, manual);
   const loy = scoreLoyalty(place);
   const dig = scoreDigitalGap(place);
@@ -690,6 +758,30 @@ function renderReport(place, nearby, manual) {
       ops.level === 'Low' ? 'None Detected' : ops.level === 'Medium' ? 'Minor Flags' : 'Major Flags',
       true
     );
+
+  // Company registry panel
+  const regPanel = document.getElementById('registryPanel');
+  const regContent = document.getElementById('registryContent');
+  if (registry) {
+    regPanel.style.display = 'block';
+    if (registry.error) {
+      regContent.innerHTML = `<div class="review-text">${esc(registry.error)}</div>`;
+    } else if (!registry.found) {
+      regContent.innerHTML = `<div class="review-text">No match in the company registry — likely operating as a sole trader (autónomo). Treat manually-entered years/owner-age estimates as your primary signal.</div>`;
+    } else {
+      const rows = [
+        ['Legal name', registry.legalName],
+        ['Legal form', registry.legalForm],
+        ['Incorporated', registry.incorporationDate],
+        ['Employees on record', registry.employees],
+        ['Revenue band', registry.revenueBand],
+        ['Last filed accounts', registry.lastFiledYear],
+      ].filter(([, v]) => v);
+      regContent.innerHTML = `<ul class="factors">${rows.map(([k, v]) => `<li><strong>${esc(k)}:</strong> ${esc(v)}</li>`).join('')}</ul>`;
+    }
+  } else {
+    regPanel.style.display = 'none';
+  }
 
   // Reviews: new Places API uses review.text.text and review.authorAttribution.displayName
   const reviews = place.reviews || [];
@@ -730,8 +822,12 @@ async function startAnalysis() {
     notes:       document.getElementById('notes').value,
   };
 
+  const registryEndpoint = document.getElementById('registryEndpoint').value.trim();
+  const registryKey      = document.getElementById('registryKey').value.trim();
+
   hide('errBox'); hide('report');
   document.getElementById('reviewsPanel').style.display = 'none';
+  document.getElementById('registryPanel').style.display = 'none';
 
   if (!input)  { showErr('Enter a salon name or Google Maps link.'); return; }
   if (!apiKey) { showErr('Enter your Google Places API key.'); return; }
@@ -752,9 +848,10 @@ async function startAnalysis() {
     const place     = normalisedPlace(rawPlace);
     const rawNearby = await searchNearby(rawPlace.location);
     const nearby    = normalisedNearby(rawNearby);
+    const registry  = await lookupRegistry(registryEndpoint, registryKey, place.name);
 
     hide('loading');
-    renderReport(place, nearby, manual);
+    renderReport(place, nearby, manual, registry);
   } catch(e) {
     hide('loading');
     showErr(e.message);
